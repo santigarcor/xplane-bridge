@@ -1,18 +1,19 @@
-import WebSocket from 'ws'
+import WebSocket, { type RawData } from 'ws'
 import fs from 'fs'
 import 'dotenv/config'
 import { Arduino } from './arduino.js'
 import type {
+  ArduinoMessage,
   DataRefMapping,
   DataRefMappings,
-  InputMapping,
   InputMappings,
   ValueMap,
   XPlaneIdentifierType,
+  XplaneWebsocketMessage,
 } from './types.js'
-import { ParserType } from './types.js'
+import { ParserType, XPlaneMessageType } from './types.js'
 
-const parserLibrary: Record<string, (v: any, extra?: any) => any> = {
+const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
   [ParserType.BOOLEAN]: (v) => (v > 0.5 ? 1 : 0),
   [ParserType.ROUND]: (v) => Math.round(v),
   [ParserType.TO_DEGREES]: (v) => Math.round(v * (180 / Math.PI)),
@@ -51,6 +52,7 @@ export class XPlaneArduinoBridge {
     this.arduino = new Arduino(
       parseInt(process.env.ARDUINO_BAUD || '9600'),
       (data) => this.handleArduinoMessage(data),
+      false,
     )
   }
 
@@ -256,124 +258,251 @@ export class XPlaneArduinoBridge {
     }
   }
 
-  // async run() {
-  //   await this.arduino.connect()
-  //   this.initializeWebSocket()
-  // }
+  public close() {
+    this.webSocket?.close()
+    this.arduino.disconnect()
+  }
 
-  // private initializeWebSocket() {
-  //   const url = `ws://${process.env.XPLANE_HOST}:${process.env.XPLANE_PORT}/api/v2`
-  //   this.webSocket = new WebSocket(url)
+  public async run() {
+    await this.arduino.connect()
+    this.initializeWebSocket()
+  }
 
-  //   this.webSocket.on("open", async () => {
-  //     console.log("✓ Conexión WebSocket con X-Plane establecida")
-  //     await this.subscribeToAllDataReferences()
-  //   })
+  private initializeWebSocket() {
+    this.webSocket = new WebSocket(this.websocketsUrl)
 
-  //   this.webSocket.on("message", (messageBuffer) => {
-  //     const messageData = JSON.parse(messageBuffer.toString())
-  //     if (messageData.type === "dataref_update_values") {
-  //       this.processXPlaneUpdate(messageData.data)
-  //     }
-  //   })
+    this.webSocket.on('open', async () => {
+      console.log('[✈️] ✅ WebSocket connection with X-Plane established')
+      await this.subscribeToAllDataReferences()
+      console.log('Press Ctrl+C to exit')
+      console.log('---------------------------------------------')
+    })
 
-  //   this.webSocket.on("close", () => {
-  //     console.log("⚠️ Conexión con X-Plane perdida. Reconectando...")
-  //     setTimeout(() => this.initializeWebSocket(), 5000)
-  //   })
-  // }
+    this.webSocket.on('message', this.processXPlaneUpdate)
 
-  // private async subscribeToAllDataReferences() {
-  //   const subscriptionList = []
+    this.webSocket.on('close', () => {
+      console.warn(
+        '[✈️] ⚠️ WebSocket connection closed. Reconnecting in 5 seconds...',
+      )
+      setTimeout(() => this.initializeWebSocket(), 5000)
+    })
+  }
 
-  //   for (const config of this.dataReferenceConfigurations) {
-  //     const internalId = await this.getXPlaneInternalIdentifier(
-  //       "datarefs",
-  //       config.name,
-  //     )
-  //     if (internalId) {
-  //       this.dataReferenceIdentifierCache.set(internalId, config)
-  //       this.dataReferenceNameToIdentifier.set(config.name, internalId)
-  //       subscriptionList.push({ id: internalId })
-  //     }
-  //   }
+  private async subscribeToAllDataReferences(): Promise<void> {
+    const subscriptionList = []
 
-  //   this.sendWebSocketMessage("dataref_subscribe_values", {
-  //     datarefs: subscriptionList,
-  //   })
-  // }
+    console.log('[🏗️] Building dataref ID mappings')
+    for (const key in this.dataRefMappings) {
+      const dataRefId = await this.getXPlaneIdentifierId('datarefs', key)
+      if (dataRefId !== null) {
+        subscriptionList.push({ id: dataRefId, name: key })
+      }
+    }
 
-  // private processXPlaneUpdate(updates: Record<string, number>) {
-  //   for (const [identifierString, rawValue] of Object.entries(updates)) {
-  //     const internalId = parseInt(identifierString)
-  //     const config = this.dataReferenceIdentifierCache.get(internalId)
+    if (subscriptionList.length === 0) {
+      console.warn('[✈️] ⚠️ No valid datarefs to monitor.')
+      return
+    }
 
-  //     if (!config) continue
+    const requestId = this.sendWebSocketMessage('dataref_subscribe_values', {
+      datarefs: subscriptionList.map((item) => ({ id: item.id })),
+    })
+    console.log(
+      `[✈️] ✅ Subscribed to ${subscriptionList.length} datarefs (ID: ${requestId})`,
+    )
+  }
 
-  //     // Lógica de transformación de valores (Booleanos y Enums)
-  //     let processedValue = rawValue
-  //     if (config.type === "boolean") {
-  //       processedValue = rawValue > 0.5 ? 1 : 0
-  //     } else if (config.type === "enum" && config.mapping) {
-  //       const roundedStringValue = Math.round(rawValue).toString()
-  //       processedValue =
-  //         config.mapping[roundedStringValue] !== undefined
-  //           ? config.mapping[roundedStringValue]
-  //           : rawValue
-  //     }
+  private findDataRefNameById(dataRefId: number): string | null {
+    for (const [name, cachedId] of this.idCache.datarefs) {
+      if (cachedId === dataRefId) {
+        return name
+      }
+    }
+    return null
+  }
 
-  //     const threshold = config.threshold || 0
-  //     const previousValue = this.previousValuesCache.get(config.command)
+  private parseValue(
+    value: any,
+    parserType?: ParserType | undefined,
+    valueMap?: ValueMap | undefined,
+  ) {
+    return !parserType ? value : parserLibrary[parserType](value, valueMap)
+  }
 
-  //     // Verificación de umbral (Threshold)
-  //     const hasChangedSignificantly =
-  //       previousValue === undefined ||
-  //       Math.abs(Number(processedValue) - Number(previousValue)) >= threshold
+  private shouldSendUpdate(
+    arduinoCmd: string,
+    newValue: any,
+    threshold: number,
+  ): boolean {
+    if (this.previousValues[arduinoCmd] === undefined) {
+      return true
+    }
 
-  //     if (hasChangedSignificantly) {
-  //       this.arduino.sendJson({ cmd: config.command, value: processedValue })
-  //       this.previousValuesCache.set(config.command, processedValue)
-  //     }
-  //   }
-  // }
+    const oldValue = this.previousValues[arduinoCmd]
 
-  // private async handleArduinoMessage(data: any) {
-  //   const userInputKey = data.user_input
-  //   const mapping = this.userInputMappings[userInputKey]
-  //   if (!mapping) return
+    if (typeof newValue === 'number' && typeof oldValue === 'number') {
+      return Math.abs(newValue - oldValue) >= threshold
+    }
 
-  //   if (mapping.type === "command") {
-  //     const commandId = await this.getXPlaneInternalIdentifier(
-  //       "commands",
-  //       mapping.action,
-  //     )
-  //     if (commandId) {
-  //       this.sendWebSocketMessage("command_set_is_active", {
-  //         commands: [{ id: commandId, is_active: true, duration: 0 }],
-  //       })
-  //     }
-  //   } else if (mapping.type === "dataref") {
-  //     const dataReferenceId = await this.getXPlaneInternalIdentifier(
-  //       "datarefs",
-  //       mapping.action,
-  //     )
-  //     if (dataReferenceId) {
-  //       this.sendWebSocketMessage("dataref_set_values", {
-  //         datarefs: [{ id: dataReferenceId, value: mapping.value }],
-  //       })
-  //     }
-  //   }
-  // }
+    return newValue !== oldValue
+  }
 
-  // private sendWebSocketMessage(messageType: string, parameters: any) {
-  //   if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
-  //     this.webSocket.send(
-  //       JSON.stringify({
-  //         req_id: this.requestIdentifierCounter++,
-  //         type: messageType,
-  //         params: parameters,
-  //       }),
-  //     )
-  //   }
-  // }
+  private processXPlaneUpdate(rawData: RawData) {
+    try {
+      const message: XplaneWebsocketMessage = JSON.parse(rawData.toString())
+
+      switch (message.type) {
+        case 'result':
+          if (!message.success) {
+            console.error(
+              `[✈️] ❌ X-Plane request ${message.request_id} failed: ${message.error_code} - ${message.error_message}`,
+            )
+            return
+          }
+          console.log(`[✈️] ✅ X-Plane request ${message.request_id} succeeded`)
+          break
+        case 'dataref_update_values':
+          const updates = message.data || {}
+
+          for (const dataRefId in updates) {
+            const updatedValue = updates[dataRefId]
+
+            let dataRefName: string | null = this.findDataRefNameById(
+              parseInt(dataRefId),
+            )
+
+            if (!dataRefName || !this.dataRefMappings[dataRefName]) {
+              return
+            }
+
+            const mapping = this.dataRefMappings[dataRefName]
+            const arduinoCmd = mapping.arduino_cmd
+            const parserType = mapping.parser
+            const valueMap = mapping.value_map
+            const threshold = mapping.threshold || 0
+
+            let parsedValue = null
+            try {
+              parsedValue = this.parseValue(updatedValue, parserType, valueMap)
+            } catch (error) {
+              console.error(
+                `[✈️] ❌ Error parsing value for "${dataRefName}": `,
+                error,
+              )
+              continue
+            }
+
+            if (!this.shouldSendUpdate(arduinoCmd, parsedValue, threshold)) {
+              continue
+            }
+
+            this.arduino.sendCommand({ cmd: arduinoCmd, value: parsedValue })
+            this.previousValues[arduinoCmd] = parsedValue
+          }
+          break
+      }
+    } catch (error) {
+      console.error('[✈️] ❌ Error processing X-Plane update: ', error)
+      return
+    }
+  }
+
+  /**
+   * Executes an X-Plane command via WebSocket.
+   * Duration 0 means press and release immediately.
+   * @param xplaneCommand - The X-Plane command to execute.
+   * @param duration - The duration to hold the command active (in seconds).
+   */
+  private async executeXPlaneCommand(
+    xplaneCommand: string,
+    duration: number = 0,
+  ): Promise<void> {
+    const id = await this.getXPlaneIdentifierId('commands', xplaneCommand)
+
+    if (id === null) {
+      console.error(`❌ Command "${xplaneCommand}" not found in X-Plane`)
+      return
+    }
+
+    const requestId = this.sendWebSocketMessage(
+      XPlaneMessageType.COMMAND_SET_IS_ACTIVE,
+      { commands: [{ id, is_active: true, duration }] },
+    )
+    console.log(
+      `[💻] ➡️ [✈️] X-Plane command "${xplaneCommand}" (Duration ${duration}, Request ID: ${requestId})`,
+    )
+  }
+
+  private async setXPlaneDataRef(
+    dataRefName: string,
+    value: any,
+  ): Promise<void> {
+    const id = await this.getXPlaneIdentifierId('datarefs', dataRefName)
+
+    if (id === null) {
+      console.error(`❌ DataRef "${dataRefName}" not found in X-Plane`)
+      return
+    }
+
+    const requestId = this.sendWebSocketMessage(
+      XPlaneMessageType.DATAREF_SET_VALUES,
+      { datarefs: [{ id, value }] },
+    )
+    console.log(
+      `[💻] ➡️ [✈️] X-Plane DataRef set: "${dataRefName}" = ${value} (Request ID: ${requestId})`,
+    )
+  }
+
+  private handleArduinoMessage(message: ArduinoMessage) {
+    try {
+      console.log(`[📟] ➡️ [💻]: ${JSON.stringify(message)}`)
+      if (!message.user_input) {
+        console.warn('[📟] ⚠️ Unknown formart from Arduino')
+        return
+      }
+      const userInput = message.user_input
+
+      if (this.inputMappings[userInput] === undefined) {
+        console.warn(`[📟] ⚠️ Unknown Arduino input: ${userInput}`)
+        return
+      }
+
+      const mapping = this.inputMappings[userInput]
+      const actionType = mapping.type
+
+      if (actionType === 'command') {
+        // Execute X-Plane command (for momentary switches/buttons)
+        this.executeXPlaneCommand(mapping.xplane_action)
+      } else if (actionType === 'dataref') {
+        // Write X-Plane dataref (for toggle switches)
+        this.setXPlaneDataRef(mapping.xplane_action, mapping.value)
+      } else {
+        console.error(`[📟] ❌ Unknown action type: ${actionType}`)
+      }
+    } catch (error) {
+      console.error('[📟] ❌ Error handling Arduino message: ', error)
+    }
+  }
+
+  private sendWebSocketMessage(
+    messageType: string,
+    parameters: Record<string, any> | undefined = undefined,
+  ) {
+    const requestId = this.requestIdCounter++
+    const payload: Record<string, any> = {
+      req_id: requestId,
+      type: messageType,
+    }
+
+    if (parameters) {
+      payload['params'] = parameters
+    }
+
+    if (!this.webSocket || this.webSocket?.readyState !== WebSocket.OPEN) {
+      return -1
+    }
+
+    this.webSocket.send(JSON.stringify(payload))
+    return requestId
+  }
 }
