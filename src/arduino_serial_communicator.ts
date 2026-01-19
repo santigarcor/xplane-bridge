@@ -2,7 +2,7 @@ import { SerialPort } from 'serialport'
 import { ReadlineParser } from '@serialport/parser-readline'
 import type { ArduinoCommand, ArduinoMessage } from './types.js'
 
-export class Arduino {
+export class ArduinoSerialCommunicator {
   private serialPort: SerialPort | null = null
   private parser: ReadlineParser | null = null
   private isAttemptingConnection: boolean = false

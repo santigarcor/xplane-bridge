@@ -1,6 +1,10 @@
 import { XPlaneArduinoBridge } from './bridge.js'
+import { initializeMappings } from './mappings/ff_757.js'
+// import { initializeMappings } from './mappings/zibo_737.js'
 
 const bridge = new XPlaneArduinoBridge()
+
+initializeMappings(bridge)
 
 bridge.run()
 

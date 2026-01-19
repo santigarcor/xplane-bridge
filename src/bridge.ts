@@ -1,7 +1,7 @@
 import WebSocket, { type RawData } from 'ws'
 import fs from 'fs'
 import 'dotenv/config'
-import { Arduino } from './arduino.js'
+import { ArduinoSerialCommunicator } from './arduino_serial_communicator.js'
 import type {
   ArduinoMessage,
   DataRefMapping,
@@ -23,7 +23,7 @@ const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
 
 export class XPlaneArduinoBridge {
   private webSocket: WebSocket | null = null
-  private arduino: Arduino
+  private arduino: ArduinoSerialCommunicator
   private requestIdCounter: number = 1
   private websocketsUrl: string
   private restUrl: string
@@ -49,9 +49,9 @@ export class XPlaneArduinoBridge {
     this.websocketsUrl = `ws://${process.env.XPLANE_HOST}:${process.env.XPLANE_PORT}/api/v2`
     this.restUrl = `http://${process.env.XPLANE_HOST}:${process.env.XPLANE_PORT}/api/v2`
 
-    this.arduino = new Arduino(
+    this.arduino = new ArduinoSerialCommunicator(
       parseInt(process.env.ARDUINO_BAUD || '9600'),
-      (data) => this.handleArduinoMessage(data),
+      (data: ArduinoMessage) => this.handleArduinoMessage(data),
       false,
     )
   }
@@ -204,8 +204,8 @@ export class XPlaneArduinoBridge {
    * Adds a rotary encoder input mapping from Arduino to trigger X-Plane commands.
    * Arduino sends increment/decrement commands and X-Plane triggers the corresponding commands.
    * @param encoderName - The name of the Arduino rotary encoder.
-   * @param incrementCommand - The X-Plane command to trigger when the encoder is turned clockwise.
-   * @param decrementCommand - The X-Plane command to trigger when the encoder is turned counter-clockwise.
+   * @param incrementCommand - The X-Plane command to trigger when the encoder is turned clockwise. *_increment
+   * @param decrementCommand - The X-Plane command to trigger when the encoder is turned counter-clockwise. *_decrement
    */
   public addRotaryEncoderCommands(
     encoderName: string,
@@ -278,13 +278,17 @@ export class XPlaneArduinoBridge {
       console.log('---------------------------------------------')
     })
 
-    this.webSocket.on('message', this.processXPlaneUpdate)
+    this.webSocket.on('message', this.processXPlaneUpdate.bind(this))
 
     this.webSocket.on('close', () => {
       console.warn(
         '[✈️] ⚠️ WebSocket connection closed. Reconnecting in 5 seconds...',
       )
       setTimeout(() => this.initializeWebSocket(), 5000)
+    })
+
+    this.webSocket.on('error', (error) => {
+      console.error('[✈️] ❌ WebSocket error: ', error)
     })
   }
 
@@ -366,7 +370,6 @@ export class XPlaneArduinoBridge {
 
           for (const dataRefId in updates) {
             const updatedValue = updates[dataRefId]
-
             let dataRefName: string | null = this.findDataRefNameById(
               parseInt(dataRefId),
             )

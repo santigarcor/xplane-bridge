@@ -39,7 +39,7 @@ export type XplaneWebsocketMessage = {
 export type DataRefMapping = {
   arduino_cmd: string
   threshold: number
-  parser?: ParserType | undefined
+  parser: ParserType | undefined
   value_map?: ValueMap | undefined
 }
 
