@@ -49,7 +49,7 @@ export type DataRefMappings = {
 
 export type InputMapping = {
   type: InputType
-  xplane_action: string
+  xplane_actions: string[]
   value?: any | undefined
 }
 

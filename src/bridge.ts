@@ -12,6 +12,7 @@ import type {
   XplaneWebsocketMessage,
 } from './types.js'
 import { ParserType, XPlaneMessageType } from './types.js'
+import { ensureArray } from './helpers.js'
 
 const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
   [ParserType.BOOLEAN]: (v) => (v > 0.5 ? 1 : 0),
@@ -115,20 +116,20 @@ export class XPlaneArduinoBridge {
    */
   public addToggleSwitchInputDataRef(
     switchName: string,
-    dataRefName: string,
+    dataRefNames: string | string[],
   ): void {
     this.inputMappings[`${switchName}_on`] = {
       type: 'dataref',
-      xplane_action: dataRefName,
+      xplane_actions: ensureArray(dataRefNames),
       value: 1,
     }
     this.inputMappings[`${switchName}_off`] = {
       type: 'dataref',
-      xplane_action: dataRefName,
+      xplane_actions: ensureArray(dataRefNames),
       value: 0,
     }
     console.log(
-      `➕ [toggle switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${dataRefName}`,
+      `➕ [toggle switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${ensureArray(dataRefNames).join(', ')}`,
     )
   }
 
@@ -141,19 +142,19 @@ export class XPlaneArduinoBridge {
    */
   public addToggleSwitchInputCommands(
     switchName: string,
-    onCommand: string,
-    offCommand?: string | undefined,
+    onCommands: string | string[],
+    offCommands?: string | string[] | undefined,
   ): void {
     this.inputMappings[`${switchName}_on`] = {
       type: 'command',
-      xplane_action: onCommand,
+      xplane_actions: ensureArray(onCommands),
     }
     this.inputMappings[`${switchName}_off`] = {
       type: 'command',
-      xplane_action: offCommand || onCommand,
+      xplane_actions: ensureArray(offCommands || onCommands),
     }
     console.log(
-      `➕ [toggle switch] Arduino to X-Plane command mapping added: ${switchName} -> ${onCommand}/${offCommand}`,
+      `➕ [toggle switch] Arduino to X-Plane command mapping added: ${switchName} -> ${ensureArray(onCommands).join(', ')}/${offCommands ? ensureArray(offCommands).join(', ') : ''}`,
     )
   }
 
@@ -165,15 +166,15 @@ export class XPlaneArduinoBridge {
    */
   public addMomentarySwitchInputCommand(
     switchName: string,
-    command: string,
+    commands: string | string[],
   ): void {
     this.inputMappings[switchName] = {
       type: 'command',
-      xplane_action: command,
+      xplane_actions: ensureArray(commands),
     }
 
     console.log(
-      `➕ [momentary switch] Arduino to X-Plane command mapping added: ${switchName} -> ${command}`,
+      `➕ [momentary switch] Arduino to X-Plane command mapping added: ${switchName} -> ${ensureArray(commands).join(', ')}`,
     )
   }
 
@@ -186,17 +187,17 @@ export class XPlaneArduinoBridge {
    */
   public addMomentarySwitchInputDataRef(
     switchName: string,
-    dataRefName: string,
+    dataRefNames: string | string[],
     value: number,
   ): void {
     this.inputMappings[switchName] = {
       type: 'dataref',
-      xplane_action: dataRefName,
+      xplane_actions: ensureArray(dataRefNames),
       value: value,
     }
 
     console.log(
-      `➕ [momentary switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${dataRefName}`,
+      `➕ [momentary switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${ensureArray(dataRefNames).join(', ')}`,
     )
   }
 
@@ -209,21 +210,21 @@ export class XPlaneArduinoBridge {
    */
   public addRotaryEncoderCommands(
     encoderName: string,
-    incrementCommand: string,
-    decrementCommand: string,
+    incrementCommands: string | string[],
+    decrementCommands: string | string[],
   ): void {
     this.inputMappings[`${encoderName}_increment`] = {
       type: 'command',
-      xplane_action: incrementCommand,
+      xplane_actions: ensureArray(incrementCommands),
     }
 
     this.inputMappings[`${encoderName}_decrement`] = {
       type: 'command',
-      xplane_action: decrementCommand,
+      xplane_actions: ensureArray(decrementCommands),
     }
 
     console.log(
-      `➕ [rotary encoder] Arduino to X-Plane command mapping added: ${encoderName} -> ${incrementCommand}/${decrementCommand}`,
+      `➕ [rotary encoder] Arduino to X-Plane command mapping added: ${encoderName} -> ${ensureArray(incrementCommands).join(', ')}/${ensureArray(decrementCommands).join(', ')}`,
     )
   }
 
@@ -413,46 +414,54 @@ export class XPlaneArduinoBridge {
   /**
    * Executes an X-Plane command via WebSocket.
    * Duration 0 means press and release immediately.
-   * @param xplaneCommand - The X-Plane command to execute.
+   * @param xplaneCommands - The X-Plane commands to execute.
    * @param duration - The duration to hold the command active (in seconds).
    */
-  private async executeXPlaneCommand(
-    xplaneCommand: string,
+  private async executeXPlaneCommands(
+    xplaneCommands: string[],
     duration: number = 0,
   ): Promise<void> {
-    const id = await this.getXPlaneIdentifierId('commands', xplaneCommand)
+    let commands: { id: number; is_active: boolean; duration: number }[] = []
+    for (const xplaneCommand of xplaneCommands) {
+      const id = await this.getXPlaneIdentifierId('commands', xplaneCommand)
 
-    if (id === null) {
-      console.error(`❌ Command "${xplaneCommand}" not found in X-Plane`)
-      return
+      if (id === null) {
+        console.error(`❌ Command "${xplaneCommand}" not found in X-Plane`)
+        return
+      }
+      commands.push({ id, is_active: true, duration })
     }
 
     const requestId = this.sendWebSocketMessage(
       XPlaneMessageType.COMMAND_SET_IS_ACTIVE,
-      { commands: [{ id, is_active: true, duration }] },
+      { commands },
     )
     console.log(
-      `[💻] ➡️ [✈️] X-Plane command "${xplaneCommand}" (Duration ${duration}, Request ID: ${requestId})`,
+      `[💻] ➡️ [✈️] X-Plane commands "${xplaneCommands.join(', ')}" (Duration ${duration}, Request ID: ${requestId})`,
     )
   }
 
-  private async setXPlaneDataRef(
-    dataRefName: string,
+  private async setXPlaneDataRefs(
+    dataRefNames: string[],
     value: any,
   ): Promise<void> {
-    const id = await this.getXPlaneIdentifierId('datarefs', dataRefName)
+    let datarefs: { id: number; value: any }[] = []
+    for (const dataRefName of dataRefNames) {
+      const id = await this.getXPlaneIdentifierId('datarefs', dataRefName)
 
-    if (id === null) {
-      console.error(`❌ DataRef "${dataRefName}" not found in X-Plane`)
-      return
+      if (id === null) {
+        console.error(`❌ DataRef "${dataRefName}" not found in X-Plane`)
+        return
+      }
+      datarefs.push({ id, value })
     }
 
     const requestId = this.sendWebSocketMessage(
       XPlaneMessageType.DATAREF_SET_VALUES,
-      { datarefs: [{ id, value }] },
+      { datarefs },
     )
     console.log(
-      `[💻] ➡️ [✈️] X-Plane DataRef set: "${dataRefName}" = ${value} (Request ID: ${requestId})`,
+      `[💻] ➡️ [✈️] X-Plane DataRef set: "${dataRefNames.join(', ')}" = ${value} (Request ID: ${requestId})`,
     )
   }
 
@@ -460,7 +469,7 @@ export class XPlaneArduinoBridge {
     try {
       console.log(`[📟] ➡️ [💻]: ${JSON.stringify(message)}`)
       if (!message.user_input) {
-        console.warn('[📟] ⚠️ Unknown formart from Arduino')
+        console.warn('[📟] ⚠️ Unknown format from Arduino')
         return
       }
       const userInput = message.user_input
@@ -474,11 +483,11 @@ export class XPlaneArduinoBridge {
       const actionType = mapping.type
 
       if (actionType === 'command') {
-        // Execute X-Plane command (for momentary switches/buttons)
-        this.executeXPlaneCommand(mapping.xplane_action)
+        // Execute X-Plane commands (for momentary switches/buttons)
+        this.executeXPlaneCommands(mapping.xplane_actions)
       } else if (actionType === 'dataref') {
-        // Write X-Plane dataref (for toggle switches)
-        this.setXPlaneDataRef(mapping.xplane_action, mapping.value)
+        // Write X-Plane datarefs (for toggle switches)
+        this.setXPlaneDataRefs(mapping.xplane_actions, mapping.value)
       } else {
         console.error(`[📟] ❌ Unknown action type: ${actionType}`)
       }
