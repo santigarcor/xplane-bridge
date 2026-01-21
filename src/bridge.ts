@@ -379,7 +379,7 @@ export class XPlaneArduinoBridge {
       const message: XplaneWebsocketMessage = JSON.parse(rawData.toString())
 
       switch (message.type) {
-        case 'result':
+        case XPlaneMessageType.RESULT:
           if (!message.success) {
             console.error(
               `[✈️] ❌ X-Plane request ${message.request_id} failed: ${message.error_code} - ${message.error_message}`,
@@ -388,7 +388,7 @@ export class XPlaneArduinoBridge {
           }
           console.log(`[✈️] ✅ X-Plane request ${message.request_id} succeeded`)
           break
-        case 'dataref_update_values':
+        case XPlaneMessageType.DATAREF_UPDATE_VALUES:
           const updates = message.data || {}
 
           for (const dataRefId in updates) {
