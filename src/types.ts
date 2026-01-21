@@ -61,6 +61,10 @@ export type XplaneWebsocketMessage = {
   error_message?: string | undefined
 }
 
+/**
+ * Mapping configuration of what command to send to Arduino for a specific X-Plane dataref,
+ * including threshold and parser type for value conversion.
+ */
 export type DataRefMapping = {
   arduino_cmd: string
   threshold: number
@@ -72,6 +76,10 @@ export type DataRefMappings = {
   [key: string]: DataRefMapping
 }
 
+/**
+ * Mapping configuration for user inputs from Arduino to X-Plane actions,
+ * specifying the type of input, associated X-Plane actions, and optional value.
+ */
 export type InputMapping = {
   type: InputType
   xplane_actions: string[]

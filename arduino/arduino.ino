@@ -5,6 +5,9 @@
 
 const long BAUD_RATE = 57600;
 
+// Debounce Momentary switches/buttons and toggles actions
+const int DEBOUNCE_DELAY = 50;
+
 /*
  * Rotary Encoders
  */
@@ -36,56 +39,41 @@ unsigned long lastEncoderPoll = 0;
 
 
 /*
- * Switches / Buttons
+ * Switches (Momentary/Buttons, Toggle)
  */
-const int SWITCH_TYPE_MOMENTARY = 1;
-const int SWITCH_TYPE_TOGGLE = 2;
+const int SWITCH_MOMENTARY = 0;
+const int SWITCH_TOGGLE = 1;
  // Poll every 10ms
 const unsigned long SWITCH_POLL_INTERVAL = 10; 
-// Switches / Buttons count
-const int SWITCHES_COUNT = 3;
-const int ENCODER_ALTITUDE_SWITCH = 5;
-const int ENCODER_HEADING_SWITCH = 7;
-const int ENCODER_SPEED_SWITCH = 17;
+// Toggles count
+const int SWITCHES_COUNT = 2;
+const int SWITCH_FLIGHT_DIRECTOR = 5;
+const int SWITCH_CMD = 8;
 
-
-// Switch data structure (removed volatile since no interrupts)
 struct SwitchData {
   int pin;
   const char* name;
-  const char* name_on;        // Command name when switch is ON (for toggles)
-  const char* name_off;       // Command name when switch is OFF (for toggles)
-  int switch_type;            // SWITCH_TYPE_MOMENTARY or SWITCH_TYPE_TOGGLE
-  bool pressed;               // For momentary switches
-  bool last_state;            // Track previous pin state
-  bool current_toggle_state;  // Current ON/OFF state for toggle switches
-  unsigned long last_change_time;     // Last time state changed
-};
+  int type;
+  bool changed;
+  bool lastState;
+  unsigned long lastChangeTime;
+}
 
-// Switch configuration array
 SwitchData switches[SWITCHES_COUNT] = {
-  // Momentary switches (buttons) - send command on press only
-  {SW_MASTER_CAUTION, "master_caution", "", "", SWITCH_TYPE_MOMENTARY, false, HIGH, false, 0},
-  
-  
-  // Toggle switches - send different commands for ON and OFF positions
-  {SW_FD_BARS, SWITCH_FD_BARS, "", "fd_bars_on", "fd_bars_off", SWITCH_TYPE_TOGGLE, false, HIGH, false, 0},
-  {SW_ACT_PRE_PIN, SWITCH_ACT_PRE, "", "act_pre_on", "act_pre_off", SWITCH_TYPE_TOGGLE, false, HIGH, false, 0},
-};
+  {SWITCH_FLIGHT_DIRECTOR, "flight_director", SWITCH_TOGGLE, false,false, 0},
+  {SWITCH_CMD, "autopilot_cmd", SWITCH_MOMENTARY, false,false, 0},
+}
 
-
-
-// Timing variables for switch polling
 unsigned long lastSwitchPoll = 0;
 
 /*
  * Displays
  */
-const int DISPLAY_COUNT = 2;
+const int DISPLAYS_COUNT = 3;
 const int DISPLAY_PIN_DIN = 48;
 const int DISPLAY_PIN_CS  = 49;
 const int DISPLAY_PIN_CLK = 50;
-const int DISPLAY_COMMANDS_COUNT = 2;
+const int DISPLAY_COMMANDS_COUNT = 4;
 
 struct DisplayCommand {
   const char* name;
@@ -96,11 +84,13 @@ struct DisplayCommand {
 
 
 
-LedControl lc = LedControl(DISPLAY_PIN_DIN, DISPLAY_PIN_CLK, DISPLAY_PIN_CS, DISPLAY_COUNT);
+LedControl lc = LedControl(DISPLAY_PIN_DIN, DISPLAY_PIN_CLK, DISPLAY_PIN_CS, DISPLAYS_COUNT);
+// All displayCommands' name MUST start with set_
 DisplayCommand displayCommands[DISPLAY_COMMANDS_COUNT] = {
-  {"set_alt", 0, 0, 5}, // set_alt on display #0, with first digit at 0, max length 5.
-  {"set_hdg", 1, 0, 3} // set_alt on display #0, with first digit at 5, max length 3.
-  {"set_spd", 1, 5, 3} // set_alt on display #0, with first digit at 5, max length 3.
+  {"set_hdg", 0, 0, 3} // set_hdg on display #0, with first digit at 0, max length 3.
+  {"set_spd", 0, 5, 3} // set_spd on display #0, with first digit at 5, max length 3.
+  {"set_alt", 1, 0, 5}, // set_alt on display #1, with first digit at 0, max length 5.
+  {"set_v_spd", 2, 3, 5}, // set_v_spd on display #2, with first digit at 3, max length 5.
 };
 
 
@@ -119,21 +109,33 @@ void pollEncoders() {
     int diff = abs(currentPosition - encoders[i].lastPosition);
     
     // Detect encoder rotation on A channel change
-    if (diff >= 4) {
-      if (currentPosition > encoders[i].lastPosition) {
-        // Clockwise rotation
-        sendEncoderEvent(encoders[i].name, "increment");
-      } else {
-        // Counter-clockwise rotation
-        sendEncoderEvent(encoders[i].name, "decrement");
-      }
-      // Update state tracking
-      encoders[i].lastPosition = currentPosition;
+    if (diff < 4) {
+      continue;
     }
+
+    if (currentPosition > encoders[i].lastPosition) {
+      // Clockwise rotation
+      sendEncoderEvent(encoders[i].name, "increment");
+    } else {
+      // Counter-clockwise rotation
+      sendEncoderEvent(encoders[i].name, "decrement");
+    }
+    // Update state tracking
+    encoders[i].lastPosition = currentPosition;
   }
 }
 
-// Non-blocking switch polling function
+// Send encoder rotation events to Python
+void sendEncoderEvent(const char* encoder_name, const char* direction) {
+  Serial.println("{\"user_input\":\"" + encoder_name + "_" + direction + "\"}")
+  // Serial.print("{\"user_input\":\"");
+  // Serial.print(encoder_name);
+  // Serial.print("_");
+  // Serial.print(direction);
+  // Serial.println("\"}");
+}
+
+// Non-blocking toggle switches polling function
 void pollSwitches() {
   // Only poll every 10ms for good responsiveness without overwhelming CPU
   if (millis() - lastSwitchPoll < SWITCH_POLL_INTERVAL) {
@@ -143,64 +145,48 @@ void pollSwitches() {
 
   // Check each switch for state changes
   for (int i = 0; i < SWITCHES_COUNT; i++) {
-    bool current_state = digitalRead(switches[i].pin);
-    
-    // Detect state change
-    if (current_state != switches[i].last_state) {
-      // Debouncing - only process if enough time has passed
-      if (millis() - switches[i].last_change_time > DEBOUNCE_DELAY) {
-        
-        if (switches[i].switch_type == SWITCH_TYPE_MOMENTARY) {
-          // MOMENTARY SWITCH: Only trigger on press (HIGH to LOW)
-          if (switches[i].last_state == HIGH && current_state == LOW) {
-            switches[i].pressed = true;
-            
-            Serial.print("MOMENTARY SWITCH PRESSED: ");
-            Serial.print(switches[i].name);
-            Serial.print(" (pin ");
-            Serial.print(switches[i].pin);
-            Serial.println(")");
-          }
-        } 
-        else if (switches[i].switch_type == SWITCH_TYPE_TOGGLE) {
-          // TOGGLE SWITCH: Trigger on both ON and OFF positions
-          bool new_toggle_state = (current_state == LOW); // LOW = ON position
-          
-          if (new_toggle_state != switches[i].current_toggle_state) {
-            switches[i].current_toggle_state = new_toggle_state;
-            switches[i].pressed = true; // Use this flag to process in main loop
-            
-            Serial.print("TOGGLE SWITCH CHANGED: ");
-            if (new_toggle_state) {
-              Serial.print(switches[i].name_on);
-              Serial.println(" (switched ON)");
-            } else {
-              Serial.print(switches[i].name_off);
-              Serial.println(" (switched OFF)");
-            }
-            Serial.print("Pin ");
-            Serial.print(switches[i].pin);
-            Serial.print(" state: ");
-            Serial.println(current_state ? "HIGH" : "LOW");
-          }
-        }
-        
-        // Update state tracking
-        switches[i].last_state = current_state;
-        switches[i].last_change_time = millis();
+    bool currentPinState = digitalRead(toggles[i].pin);
+    bool currentState = switches[i].type == SWITCH_TOGGLE 
+      ? (currentPinState == LOW) // LOW = ON position
+      : currentPinState;
+
+    // If it didn't change continue to next switch
+    if (currentState == switches[i].lastState) {
+      continue;
+    }
+
+    // If debounce time hasn't passed continue until is happens
+    if (millis() - switches[i].lastChangeTime <= DEBOUNCE_DELAY) {
+      continue;
+    }
+
+    // MOMENTARY SWITCH: Only trigger on press (HIGH to LOW)
+    if (switches[i].type == SWITCH_MOMENTARY && switches[i].lastState == HIGH && currentState == LOW) {
+      switches[i].changed = true;
+      switches[i].lastState = currentState;
+      switches[i].lastChangeTime = millis();
+      
+      Serial.print("MOMENTARY SWITCH PRESSED: ");
+      Serial.print(switches[i].name + " (pin " + switches[i].pin + ")");
+    } else if(switches[i].type == SWITCH_TOGGLE) {
+      Serial.print("TOGGLE SWITCH CHANGED: ");
+      if (currentState) {
+        Serial.print(switches[i].name + " (switched ON)");
+      } else {
+        Serial.print(switches[i].name + " (switched OFF)");
       }
+
+      Serial.print("Pin ");
+      Serial.print(switches[i].pin);
+      Serial.print(" state: ");
+      Serial.println(currentState ? "LOW" : "HIGH");
+
+      // Trigger on both ON and OFF positions
+      toggles[i].lastState = newState;
+      toggles[i].changed = true; // Use this flag to process in main loop
+      toggles[i].lastChangeTime = millis();
     }
   }
-}
-
-
-// Send encoder rotation events to Python
-void sendEncoderEvent(const char* encoder_name, const char* direction) {
-  Serial.print("{\"user_input\":\"");
-  Serial.print(encoder_name);
-  Serial.print("_");
-  Serial.print(direction);
-  Serial.println("\"}");
 }
 
 void setDisplay(DisplayCommand displayCommand,long value) {
@@ -252,25 +238,85 @@ void processSerialInput() {
 }
 
 
+void initSwitches() {
+  for (int i = 0; i < SWITCHES_COUNT; i++){
+    pinMode(switches[i].pin, INPUT_PULLUP);
+  }
+  // Let the pins settle
+  delay(100); 
+  
+  // Initialize switch states
+  for (int i = 0; i < SWITCHES_COUNT; i++) {
+    bool pinState = digitalRead(switches[i].pin);
+    switch (switches[i].type) {
+      case SWITCH_TOGGLE:
+        switches[i].lastState = (pinState == LOW);// LOW = ON position
+        break;
+      case SWITCH_MOMENTARY:
+        switches[i].lastState = pinState;
+        break;
+    }
+  }
+}
+
+void initDisplays() {
+  // Initialize 8 digits Displays
+  for (int display = 0; display < lc.getDeviceCount(); display++) {
+    lc.shutdown(display, false);
+    lc.setIntensity(display, 3);
+    lc.clearDisplay(display);
+    // lc.setScanLimit(display, 8);
+  }
+}
+
+void initEncoders() {
+  // Initialize encoders
+  for (int i = 0; i < ENCODERS_COUNT; i++) {
+    encoders[i].lastPosition = encoders[i].encoder.read();
+  }
+}
+
+// Performance monitoring (optional)
+void print_performance_stats() {
+  static unsigned long last_stats = 0;
+  static unsigned long loop_count = 0;
+  
+  loop_count++;
+  
+  // Print stats every 5 seconds
+  if (millis() - last_stats > 5000) {
+    Serial.print("Loop frequency: ");
+    Serial.print(loop_count / 5);
+    Serial.println(" Hz");
+    loop_count = 0;
+    last_stats = millis();
+  }
+}
+
+void test_lcd() {
+  for (int display = 0; display < DISPLAYS_COUNT; display++) {
+    for (int pos = 7; pos >= 0; pos--) {
+      int digit = 8 - pos;
+      lc.setDigit(display, pos, digit, false);
+      delay(200);
+    }
+  }
+  
+  // Clear all displays
+  for (int display = 0; display < DISPLAYS_COUNT; display++) {
+    lc.clearDisplay(display);
+  }
+}
+
+
 void setup() {
   Serial.begin(BAUD_RATE);
   delay(1000);
 
 
-  // Initialize LED Displays
-  for (int display = 0; display < lc.getDeviceCount(); display++) {
-    lc.shutdown(display, false);
-    lc.setIntensity(display, 1);
-    lc.clearDisplay(display);
-    // lc.setScanLimit(display, 8);
-  }
-
-  // Initialize encoders
-  for (int i = 0; i < ENCODERS_COUNT; i++) {
-    encoders[i].lastPosition = encoders[i].encoder.read();
-  }
-
-  Serial.println("Encoders initialized");
+  initSwitches();
+  initDisplays();
+  initEncoders();
 
   Serial.println("POLLING system initialized");
   Serial.println("Ready for input...");
@@ -278,7 +324,7 @@ void setup() {
 
 void loop() {
   // POLLING-based main loop
-  // poll_switches();           // Check all switches every 10ms
+  pollSwitches();             // Check all switches every 10ms
   pollEncoders();           // Check all encoders every 2ms
   // process_button_inputs();   // Send any button press events
   processSerialInput();    // Handle incoming commands from NodeJS

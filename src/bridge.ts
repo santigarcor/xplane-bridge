@@ -117,16 +117,17 @@ export class XPlaneArduinoBridge {
   public addToggleSwitchInputDataRef(
     switchName: string,
     dataRefNames: string | string[],
+    inverse: boolean = false,
   ): void {
     this.inputMappings[`${switchName}_on`] = {
       type: 'dataref',
       xplane_actions: ensureArray(dataRefNames),
-      value: 1,
+      value: inverse ? 0 : 1,
     }
     this.inputMappings[`${switchName}_off`] = {
       type: 'dataref',
       xplane_actions: ensureArray(dataRefNames),
-      value: 0,
+      value: inverse ? 1 : 0,
     }
     console.log(
       `➕ [toggle switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${ensureArray(dataRefNames).join(', ')}`,
