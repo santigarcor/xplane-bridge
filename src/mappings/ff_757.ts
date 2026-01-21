@@ -1,5 +1,5 @@
 import { XPlaneArduinoBridge } from '../bridge.js'
-import { ParserType } from '../types.js'
+import { ParserType, TOGGLE_DATAREF } from '../types.js'
 
 export function initializeMappings(bridge: XPlaneArduinoBridge): void {
   bridge.addDataRef('1-sim/AP/altSetting', {
@@ -22,6 +22,13 @@ export function initializeMappings(bridge: XPlaneArduinoBridge): void {
     'heading_encoder',
     '1-sim/comm/AP/hdgUP',
     '1-sim/comm/AP/hdgDN',
+  )
+
+  bridge.addMomentarySwitchInputDataRef(
+    'fd_toggle',
+    // ['1-sim/AP/fd1Switcher', '1-sim/AP/fd1Switcher/anim'],
+    ['anim/43/button', 'anim/43/button/anim'],
+    TOGGLE_DATAREF,
   )
 }
 

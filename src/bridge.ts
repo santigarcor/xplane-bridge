@@ -11,7 +11,7 @@ import type {
   XPlaneIdentifierType,
   XplaneWebsocketMessage,
 } from './types.js'
-import { ParserType, XPlaneMessageType } from './types.js'
+import { ParserType, TOGGLE_DATAREF, XPlaneMessageType } from './types.js'
 import { ensureArray } from './helpers.js'
 
 const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
@@ -188,7 +188,7 @@ export class XPlaneArduinoBridge {
   public addMomentarySwitchInputDataRef(
     switchName: string,
     dataRefNames: string | string[],
-    value: number,
+    value: number | typeof TOGGLE_DATAREF,
   ): void {
     this.inputMappings[switchName] = {
       type: 'dataref',
@@ -257,6 +257,28 @@ export class XPlaneArduinoBridge {
       console.error(`[✈️] ❌ Error fetching ${type} "${name}" ID: `, error)
       return null
     }
+  }
+
+  async getDataRefValue(dataRefId: number, dataRefName: string): Promise<any> {
+    try {
+      const url = `${this.restUrl}/datarefs/${dataRefId}/value`
+
+      const response = await fetch(url)
+      const jsonResponse: any = await response.json()
+
+      if (jsonResponse.data !== undefined) {
+        console.log(
+          `[✈️] ✅ Retrieved DataRef "${dataRefName}" value: ${jsonResponse.data}`,
+        )
+        return jsonResponse.data
+      }
+    } catch (error) {
+      console.error(
+        `[✈️] ❌ Error fetching DataRef "${dataRefName}" value: `,
+        error,
+      )
+    }
+    return null
   }
 
   public close() {
@@ -453,6 +475,22 @@ export class XPlaneArduinoBridge {
         console.error(`❌ DataRef "${dataRefName}" not found in X-Plane`)
         return
       }
+
+      if (value === TOGGLE_DATAREF) {
+        const currentValue = await this.getDataRefValue(id, dataRefName)
+        console.log(currentValue)
+        if (Number.isInteger(currentValue)) {
+          value = currentValue === 0 ? 1 : 0
+        } else if (typeof currentValue === 'boolean') {
+          value = !currentValue
+        } else {
+          console.error(
+            `❌ DataRef "${dataRefName}" has non-integer/boolean value: ${currentValue}`,
+          )
+          return
+        }
+      }
+
       datarefs.push({ id, value })
     }
 

@@ -19,6 +19,11 @@ export type ValueMap = Record<string, any>
 
 export type InputType = 'command' | 'dataref'
 
+/**
+ * Special constant to indicate a toggle dataref behavior for momentary switch inputs.
+ */
+export const TOGGLE_DATAREF = 'TOGGLE_DATAREF'
+
 export enum XPlaneMessageType {
   COMMAND_SET_IS_ACTIVE = 'command_set_is_active',
   DATAREF_SET_VALUES = 'dataref_set_values',
