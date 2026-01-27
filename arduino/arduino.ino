@@ -5,23 +5,24 @@
 
 const long BAUD_RATE = 57600;
 
-// Debounce Momentary switches/buttons and toggles actions
-const int DEBOUNCE_DELAY = 50;
-
 /*
  * Rotary Encoders
  */
 // Poll every 10ms
 const unsigned long ENCODER_POLL_INTERVAL = 10; 
 // Rotary Encoders count
-const int ENCODERS_COUNT = 3;
-// Rotary Encoders configuration pins. Each one should be on interrupt pins.
+const int ENCODERS_COUNT = 4;
+
+// Rotary encoders pins definition. Each one should be on interrupt pins.
+const int ENCODER_SPEED_PIN_DT = 21;
+const int ENCODER_SPEED_PIN_CLK = 20;
+const int ENCODER_HEADING_PIN_DT = 19;
+const int ENCODER_HEADING_PIN_CLK = 18;
+
 const int ENCODER_ALTITUDE_PIN_DT = 2;
-const int ENCODER_ALTITUDE_PIN_CLK = 4;
-const int ENCODER_HEADING_PIN_DT = 3;
-const int ENCODER_HEADING_PIN_CLK = 6;
-const int ENCODER_SPEED_PIN_DT = 18;
-const int ENCODER_SPEED_PIN_CLK = 16;
+const int ENCODER_ALTITUDE_PIN_CLK = 3;
+const int ENCODER_VERTICAL_SPEED_PIN_DT = 4;
+const int ENCODER_VERTICAL_SPEED_PIN_CLK = 5;
 
 struct EncoderData {
   Encoder encoder;
@@ -30,9 +31,10 @@ struct EncoderData {
 };
 
 EncoderData encoders[ENCODERS_COUNT] = {
-  {{ENCODER_ALTITUDE_PIN_DT, ENCODER_ALTITUDE_PIN_CLK}, "altitude_encoder", 0},
+  {{ENCODER_SPEED_PIN_DT, ENCODER_SPEED_PIN_CLK}, "speed_encoder", 0},
   {{ENCODER_HEADING_PIN_DT, ENCODER_HEADING_PIN_CLK}, "heading_encoder", 0},
-  {{ENCODER_SPEED_PIN_DT, ENCODER_SPEED_PIN_CLK}, "speed_encoder", 0}
+  {{ENCODER_ALTITUDE_PIN_DT, ENCODER_ALTITUDE_PIN_CLK}, "altitude_encoder", 0},
+  {{ENCODER_VERTICAL_SPEED_PIN_DT, ENCODER_VERTICAL_SPEED_PIN_CLK}, "vertical_speed_encoder", 0}
 };
 // Timing variables for encoder polling
 unsigned long lastEncoderPoll = 0;
@@ -44,11 +46,39 @@ unsigned long lastEncoderPoll = 0;
 const int SWITCH_MOMENTARY = 0;
 const int SWITCH_TOGGLE = 1;
  // Poll every 10ms
-const unsigned long SWITCH_POLL_INTERVAL = 10; 
-// Toggles count
-const int SWITCHES_COUNT = 2;
-const int SWITCH_FLIGHT_DIRECTOR = 5;
-const int SWITCH_CMD = 8;
+const unsigned long SWITCH_POLL_INTERVAL = 10;
+// Debounce Momentary switches/buttons and toggles actions
+const int DEBOUNCE_DELAY = 150;
+// Switches count
+const int SWITCHES_COUNT = 22;
+// Switch pins definition
+const int SWITCH_AT_ARM = 22;
+const int SWITCH_FLIGHT_DIRECTOR = 24;
+const int SWITCH_LANDING_L = 26;
+const int SWITCH_LANDING_R = 28;
+const int SWITCH_RUNWAY_L = 30;
+const int SWITCH_RUNWAY_R = 32;
+
+const int SWITCH_TAXI = 23;
+const int SWITCH_POS_1 = 25;
+const int SWITCH_POS_2 = 27;
+const int SWITCH_ANTI_COL = 29;
+const int SWITCH_WING = 31;
+const int SWITCH_LOGO = 33;
+
+const int SWITCH_SPEED_ENCODER = 35;
+const int SWITCH_HEADING_ENCODER = 37;
+const int SWITCH_L_NAV = 39;
+const int SWITCH_V_NAV = 41;
+const int SWITCH_ALTITUDE_ENCODER = 43;
+
+const int SWITCH_APP = 34;
+const int SWITCH_LOC = 36;
+const int SWITCH_VERTICAL_SPEED = 38;
+const int SWITCH_CMD = 40;
+const int SWITCH_DISENGAGE = 42;
+
+
 
 struct SwitchData {
   int pin;
@@ -57,12 +87,32 @@ struct SwitchData {
   bool changed;
   bool lastState;
   unsigned long lastChangeTime;
-}
+};
 
 SwitchData switches[SWITCHES_COUNT] = {
+  {SWITCH_AT_ARM, "at_arm", SWITCH_TOGGLE, false,false, 0},
   {SWITCH_FLIGHT_DIRECTOR, "flight_director", SWITCH_TOGGLE, false,false, 0},
-  {SWITCH_CMD, "autopilot_cmd", SWITCH_MOMENTARY, false,false, 0},
-}
+  {SWITCH_LANDING_L, "landing_l", SWITCH_TOGGLE, false,false, 0},
+  {SWITCH_LANDING_R, "landing_r", SWITCH_TOGGLE, false,false, 0},
+  {SWITCH_RUNWAY_L, "runway_l", SWITCH_TOGGLE, false,false, 0},
+  {SWITCH_RUNWAY_R, "runway_r", SWITCH_TOGGLE, false,false, 0},
+  {SWITCH_TAXI, "taxi", SWITCH_TOGGLE, false,false, 0},
+  {SWITCH_POS_1, "position_steady", SWITCH_TOGGLE, false,false, 0},
+  {SWITCH_POS_2, "position_strobe", SWITCH_TOGGLE, false,false, 0},
+  {SWITCH_ANTI_COL, "anti_col", SWITCH_TOGGLE, false,false, 0},
+  {SWITCH_WING, "wing", SWITCH_TOGGLE, false,false, 0},
+  {SWITCH_LOGO, "logo", SWITCH_TOGGLE, false,false, 0},
+  {SWITCH_SPEED_ENCODER, "speed_hold", SWITCH_MOMENTARY, false,false, 0},
+  {SWITCH_HEADING_ENCODER, "heading_hold", SWITCH_MOMENTARY, false,false, 0},
+  {SWITCH_L_NAV, "l_nav", SWITCH_MOMENTARY, false,false, 0},
+  {SWITCH_V_NAV, "v_nav", SWITCH_MOMENTARY, false,false, 0},
+  {SWITCH_ALTITUDE_ENCODER, "altitude_hold", SWITCH_MOMENTARY, false,false, 0},
+  {SWITCH_APP, "app", SWITCH_MOMENTARY, false,false, 0},
+  {SWITCH_LOC, "loc", SWITCH_MOMENTARY, false,false, 0},
+  {SWITCH_VERTICAL_SPEED, "vertical_speed_hold", SWITCH_MOMENTARY, false,false, 0},
+  {SWITCH_CMD, "cmd", SWITCH_MOMENTARY, false, HIGH, 0},
+  {SWITCH_DISENGAGE, "disengage", SWITCH_TOGGLE, false,false, 0},
+};
 
 unsigned long lastSwitchPoll = 0;
 
@@ -70,9 +120,9 @@ unsigned long lastSwitchPoll = 0;
  * Displays
  */
 const int DISPLAYS_COUNT = 3;
-const int DISPLAY_PIN_DIN = 48;
-const int DISPLAY_PIN_CS  = 49;
-const int DISPLAY_PIN_CLK = 50;
+const int DISPLAY_PIN_DIN = 51;
+const int DISPLAY_PIN_CS  = 52;
+const int DISPLAY_PIN_CLK = 53;
 const int DISPLAY_COMMANDS_COUNT = 4;
 
 struct DisplayCommand {
@@ -82,15 +132,35 @@ struct DisplayCommand {
   int maxLength;
 };
 
-
-
 LedControl lc = LedControl(DISPLAY_PIN_DIN, DISPLAY_PIN_CLK, DISPLAY_PIN_CS, DISPLAYS_COUNT);
 // All displayCommands' name MUST start with set_
 DisplayCommand displayCommands[DISPLAY_COMMANDS_COUNT] = {
-  {"set_hdg", 0, 0, 3} // set_hdg on display #0, with first digit at 0, max length 3.
-  {"set_spd", 0, 5, 3} // set_spd on display #0, with first digit at 5, max length 3.
+  {"set_spd", 0, 5, 3}, // set_spd on display #0, with first digit at 5, max length 3.
+  {"set_hdg", 0, 0, 3}, // set_hdg on display #0, with first digit at 0, max length 3.  
   {"set_alt", 1, 0, 5}, // set_alt on display #1, with first digit at 0, max length 5.
-  {"set_v_spd", 2, 3, 5}, // set_v_spd on display #2, with first digit at 3, max length 5.
+  {"set_v_spd", 2, 3, 5} // set_v_spd on display #2, with first digit at 3, max length 5.
+};
+
+
+/*
+ * LEDs
+ */
+const int LEDS_COUNT = 9;
+struct LedCommand {
+  const char* name;
+  int pin;
+};
+
+LedCommand leds[LEDS_COUNT] = {
+  {"speed_led", A15},
+  {"heading_led", A14},
+  {"l_nav_led", A13},
+  {"v_nav_led", A12},
+  {"altitude_led", A11},
+  {"app_led", A10},
+  {"vertical_speed_led", A9},
+  {"loc_led", A8},
+  {"cmd_led", A7}
 };
 
 
@@ -127,12 +197,11 @@ void pollEncoders() {
 
 // Send encoder rotation events to Python
 void sendEncoderEvent(const char* encoder_name, const char* direction) {
-  Serial.println("{\"user_input\":\"" + encoder_name + "_" + direction + "\"}")
-  // Serial.print("{\"user_input\":\"");
-  // Serial.print(encoder_name);
-  // Serial.print("_");
-  // Serial.print(direction);
-  // Serial.println("\"}");
+  Serial.print("{\"user_input\":\"");
+  Serial.print(encoder_name);
+  Serial.print("_");
+  Serial.print(direction);
+  Serial.println("\"}");
 }
 
 // Non-blocking toggle switches polling function
@@ -145,7 +214,7 @@ void pollSwitches() {
 
   // Check each switch for state changes
   for (int i = 0; i < SWITCHES_COUNT; i++) {
-    bool currentPinState = digitalRead(toggles[i].pin);
+    bool currentPinState = digitalRead(switches[i].pin);
     bool currentState = switches[i].type == SWITCH_TOGGLE 
       ? (currentPinState == LOW) // LOW = ON position
       : currentPinState;
@@ -160,6 +229,8 @@ void pollSwitches() {
       continue;
     }
 
+
+
     // MOMENTARY SWITCH: Only trigger on press (HIGH to LOW)
     if (switches[i].type == SWITCH_MOMENTARY && switches[i].lastState == HIGH && currentState == LOW) {
       switches[i].changed = true;
@@ -167,13 +238,22 @@ void pollSwitches() {
       switches[i].lastChangeTime = millis();
       
       Serial.print("MOMENTARY SWITCH PRESSED: ");
-      Serial.print(switches[i].name + " (pin " + switches[i].pin + ")");
+      Serial.print(switches[i].name);
+      Serial.print(" (pin ");
+      Serial.print(switches[i].pin);
+      Serial.println(")");
+      
+    } else if(switches[i].type == SWITCH_MOMENTARY && switches[i].lastState == LOW) {
+      // MOMENTARY SWITCH: If was LOW and now is HIGH revert to HIGH. 
+      switches[i].lastState = currentState;
     } else if(switches[i].type == SWITCH_TOGGLE) {
+      // TOGGLE SWITCH: Trigger on both ON and OFF positions
       Serial.print("TOGGLE SWITCH CHANGED: ");
+      Serial.print(switches[i].name);
       if (currentState) {
-        Serial.print(switches[i].name + " (switched ON)");
+        Serial.print(" (switched ON)");
       } else {
-        Serial.print(switches[i].name + " (switched OFF)");
+        Serial.print(" (switched OFF)");
       }
 
       Serial.print("Pin ");
@@ -181,10 +261,10 @@ void pollSwitches() {
       Serial.print(" state: ");
       Serial.println(currentState ? "LOW" : "HIGH");
 
-      // Trigger on both ON and OFF positions
-      toggles[i].lastState = newState;
-      toggles[i].changed = true; // Use this flag to process in main loop
-      toggles[i].lastChangeTime = millis();
+     
+      switches[i].lastState = currentState;
+      switches[i].changed = true; // Use this flag to process in main loop
+      switches[i].lastChangeTime = millis();
     }
   }
 }
@@ -213,6 +293,7 @@ void processSerialInput() {
   }
 
   String cmd = doc["cmd"];
+  // Command for displays
   if (cmd.startsWith("set_")) {
     for (int i = 0; i < DISPLAY_COMMANDS_COUNT; i++) {
       if (cmd == displayCommands[i].name){
@@ -221,20 +302,44 @@ void processSerialInput() {
       }
     }
   } else {
+    // Instruction for LEDs
+    int i =0;
+    bool ledFound = false;
 
+    while (i < LEDS_COUNT && !ledFound) {
+      if (cmd == leds[i].name) {
+        ledFound = true;
+      } else {
+        i++;
+      }
+    }
+
+    if (ledFound) {
+      digitalWrite(leds[i].pin, doc["value"] == 0 ? LOW : HIGH);
+    }
   }
+}
 
-  // if (cmd == "set_course1") {
-  // } else {
-  //   bool led_found = false;
-  //   for (int i = 0; i < num_led_commands; i++) {
-  //     if (cmd == led_commands[i].cmd_name) {
-  //       set_LED(led_commands[i].led_pin, doc["value"]);
-  //       led_found = true;
-  //       break;
-  //     }
-  //   }
-  // }
+void sendSwitchInputs() {
+  for (int i = 0; i < SWITCHES_COUNT; i++) {
+    if (switches[i].changed) {
+      switches[i].changed = false; // Reset flag
+      
+      if (switches[i].type == SWITCH_MOMENTARY) {
+        // MOMENTARY SWITCH: Send single command
+        Serial.print("{\"user_input\":\"");
+        Serial.print(switches[i].name);
+        Serial.println("\"}");
+      } 
+      else if (switches[i].type == SWITCH_TOGGLE) {
+        // TOGGLE SWITCH: Send appropriate ON or OFF command
+        Serial.print("{\"user_input\":\"");
+        Serial.print(switches[i].name);   // Switch is ON
+        Serial.print(switches[i].lastState ? "_on" : "_off");
+        Serial.println("\"}");
+      }
+    }
+  }
 }
 
 
@@ -273,6 +378,14 @@ void initEncoders() {
   // Initialize encoders
   for (int i = 0; i < ENCODERS_COUNT; i++) {
     encoders[i].lastPosition = encoders[i].encoder.read();
+  }
+}
+
+void initLeds() {
+  // Initialize LED pins
+  for (int i = 0; i < LEDS_COUNT; i++){
+    pinMode(leds[i].pin, OUTPUT);
+    digitalWrite(leds[i].pin, LOW);
   }
 }
 
@@ -317,6 +430,7 @@ void setup() {
   initSwitches();
   initDisplays();
   initEncoders();
+  initLeds();
 
   Serial.println("POLLING system initialized");
   Serial.println("Ready for input...");
@@ -326,7 +440,7 @@ void loop() {
   // POLLING-based main loop
   pollSwitches();             // Check all switches every 10ms
   pollEncoders();           // Check all encoders every 2ms
-  // process_button_inputs();   // Send any button press events
+  sendSwitchInputs();   // Send any button press events
   processSerialInput();    // Handle incoming commands from NodeJS
   
   // Optional: Performance monitoring
