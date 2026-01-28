@@ -15,7 +15,7 @@ import { ParserType, TOGGLE_DATAREF, XPlaneMessageType } from './types.js'
 import { ensureArray } from './helpers.js'
 
 const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
-  [ParserType.BOOLEAN]: (v) => (v > 0.5 ? 1 : 0),
+  [ParserType.BOOLEAN]: (v) => (v > 0 ? 1 : 0),
   [ParserType.ROUND]: (v) => Math.round(v),
   [ParserType.TO_DEGREES]: (v) => Math.round(v * (180 / Math.PI)),
   [ParserType.VALUE_MAP]: (v, map) =>
@@ -289,6 +289,7 @@ export class XPlaneArduinoBridge {
 
   public async run() {
     await this.arduino.connect()
+    await new Promise((resolve) => setTimeout(resolve, 2000))
     this.initializeWebSocket()
   }
 
