@@ -78,7 +78,7 @@ const int SWITCH_VERTICAL_SPEED = 38;
 const int SWITCH_CMD = 40;
 const int SWITCH_DISENGAGE = 42;
 
-
+unsigned long lastSwitchPoll = 0;
 
 struct SwitchData {
   int pin;
@@ -114,8 +114,6 @@ SwitchData switches[SWITCHES_COUNT] = {
   {SWITCH_DISENGAGE, "disengage", SWITCH_TOGGLE, false,false, 0},
 };
 
-unsigned long lastSwitchPoll = 0;
-
 /*
  * Displays
  */
@@ -130,17 +128,17 @@ struct DisplayCommand {
   int displayToShow;
   int firstDigitPosition;
   int maxLength;
+  bool showSign;
 };
 
 LedControl lc = LedControl(DISPLAY_PIN_DIN, DISPLAY_PIN_CLK, DISPLAY_PIN_CS, DISPLAYS_COUNT);
 // All displayCommands' name MUST start with set_
 DisplayCommand displayCommands[DISPLAY_COMMANDS_COUNT] = {
-  {"set_spd", 0, 5, 3}, // set_spd on display #0, with first digit at 5, max length 3.
-  {"set_hdg", 0, 0, 3}, // set_hdg on display #0, with first digit at 0, max length 3.  
-  {"set_alt", 1, 0, 5}, // set_alt on display #1, with first digit at 0, max length 5.
-  {"set_v_spd", 2, 3, 5} // set_v_spd on display #2, with first digit at 3, max length 5.
+  {"set_speed", 0, 5, 3, false}, // set_spd on display #0, with first digit at 5, max length 3.
+  {"set_heading", 0, 0, 3, false}, // set_hdg on display #0, with first digit at 0, max length 3.  
+  {"set_altitude", 1, 0, 5, false}, // set_alt on display #1, with first digit at 0, max length 5.
+  {"set_vertical_speed", 2, 3, 5, true} // set_v_spd on display #2, with first digit at 3, max length 5.
 };
-
 
 /*
  * LEDs
@@ -162,7 +160,6 @@ LedCommand leds[LEDS_COUNT] = {
   {"loc_led", A8},
   {"cmd_led", A7}
 };
-
 
 
 // Non-blocking encoder polling function
@@ -229,8 +226,6 @@ void pollSwitches() {
       continue;
     }
 
-
-
     // MOMENTARY SWITCH: Only trigger on press (HIGH to LOW)
     if (switches[i].type == SWITCH_MOMENTARY && switches[i].lastState == HIGH && currentState == LOW) {
       switches[i].changed = true;
@@ -261,7 +256,6 @@ void pollSwitches() {
       Serial.print(" state: ");
       Serial.println(currentState ? "LOW" : "HIGH");
 
-     
       switches[i].lastState = currentState;
       switches[i].changed = true; // Use this flag to process in main loop
       switches[i].lastChangeTime = millis();
@@ -269,10 +263,34 @@ void pollSwitches() {
   }
 }
 
+bool hasMoreThanXDigits(long number, int x) {
+    return abs(number) >= pow(10, x); 
+}
+
 void setDisplay(DisplayCommand displayCommand,long value) {
   int digitPosition = displayCommand.firstDigitPosition;
-  while (digitPosition < (displayCommand.maxLength + displayCommand.firstDigitPosition)) {
-    byte digitValue = value % 10;      // Get the last number (ex: of 123, we get 3)
+  int maxLength = displayCommand.maxLength - (displayCommand.showSign ? 1 : 0);
+  int maxDigitPosition = maxLength + displayCommand.firstDigitPosition - 1; // If first digit is 0 and max is 5 the max digit position is 4 starting at 0
+
+  // Clear the display before update
+  // lc.clearDisplay(displayCommand.displayToShow);
+
+  // If the value exceds the display max length we display Err
+  if (hasMoreThanXDigits(value, maxLength)) {
+    lc.setChar(displayCommand.displayToShow, displayCommand.firstDigitPosition + 2, 'E', false);
+    lc.setRow(displayCommand.displayToShow, displayCommand.firstDigitPosition + 1 , B00000101); // r
+    lc.setRow(displayCommand.displayToShow, displayCommand.firstDigitPosition , B00000101); // r
+    return;
+  }
+
+  if (displayCommand.showSign && value < 0) {
+    lc.setChar(displayCommand.displayToShow, displayCommand.firstDigitPosition + maxLength, '-', false);
+  } else if (displayCommand.showSign && value > 0) {
+    lc.setChar(displayCommand.displayToShow, displayCommand.firstDigitPosition + maxLength, ' ', false);
+  }
+
+  while (digitPosition <= maxDigitPosition) {
+    byte digitValue = abs(value) % 10;      // Get the last number (ex: of 123, we get 3)
     lc.setDigit(displayCommand.displayToShow, digitPosition, digitValue, false);
     value = value / 10;                // Remove last number (ex: from 123 to 12)
     digitPosition++;                 // next digit position
