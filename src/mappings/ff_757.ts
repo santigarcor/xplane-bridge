@@ -161,12 +161,12 @@ export function initializeMappings(bridge: XPlaneArduinoBridge): void {
   bridge.addBooleanDataRef('1-sim/AP/lamp/8', 'altitude_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/7', 'vertical_speed_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/3', 'l_nav_led')
+  bridge.addBooleanDataRef('1-sim/AP/lamp/4', 'v_nav_led')
+  bridge.addBooleanDataRef('1-sim/AP/lamp/10', 'loc_led')
+  bridge.addBooleanDataRef('1-sim/AP/lamp/11', 'app_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/12', 'cmd_led')
 }
 
 // position_strobe
 
 // speed_led
-// v_nav_led
-// app_led
-// loc_led
