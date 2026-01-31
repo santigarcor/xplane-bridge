@@ -65,7 +65,7 @@ export class XPlaneArduinoBridge {
   public addDataRef(dataRefName: string, mapping: DataRefMapping): void {
     this.dataRefMappings[dataRefName] = mapping
     console.log(
-      `➕ X-Plane to Arduino mapping added: ${dataRefName} -> ${mapping.arduino_cmd}` +
+      `[🏗️] ➕ X-Plane to Arduino mapping added: ${dataRefName} -> ${mapping.arduino_cmd}` +
         (mapping.threshold ? ` (threshold: ${mapping.threshold})` : '') +
         (mapping.parser ? ` (parser: ${mapping.parser})` : '') +
         (mapping.value_map
@@ -130,7 +130,7 @@ export class XPlaneArduinoBridge {
       value: inverse ? 1 : 0,
     }
     console.log(
-      `➕ [toggle switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${ensureArray(dataRefNames).join(', ')}`,
+      `[🏗️] ➕ [toggle switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${ensureArray(dataRefNames).join(', ')}`,
     )
   }
 
@@ -155,7 +155,7 @@ export class XPlaneArduinoBridge {
       xplane_actions: ensureArray(offCommands || onCommands),
     }
     console.log(
-      `➕ [toggle switch] Arduino to X-Plane command mapping added: ${switchName} -> ${ensureArray(onCommands).join(', ')}/${offCommands ? ensureArray(offCommands).join(', ') : ''}`,
+      `[🏗️] ➕ [toggle switch] Arduino to X-Plane command mapping added: ${switchName} -> ${ensureArray(onCommands).join(', ')}/${offCommands ? ensureArray(offCommands).join(', ') : ''}`,
     )
   }
 
@@ -168,14 +168,16 @@ export class XPlaneArduinoBridge {
   public addMomentarySwitchInputCommand(
     switchName: string,
     commands: string | string[],
+    duration: number = 0,
   ): void {
     this.inputMappings[switchName] = {
       type: 'command',
       xplane_actions: ensureArray(commands),
+      duration,
     }
 
     console.log(
-      `➕ [momentary switch] Arduino to X-Plane command mapping added: ${switchName} -> ${ensureArray(commands).join(', ')}`,
+      `[🏗️] ➕ [momentary switch] Arduino to X-Plane command mapping added: ${switchName} -> ${ensureArray(commands).join(', ')}`,
     )
   }
 
@@ -198,7 +200,7 @@ export class XPlaneArduinoBridge {
     }
 
     console.log(
-      `➕ [momentary switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${ensureArray(dataRefNames).join(', ')}`,
+      `[🏗️] ➕ [momentary switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${ensureArray(dataRefNames).join(', ')}`,
     )
   }
 
@@ -225,7 +227,7 @@ export class XPlaneArduinoBridge {
     }
 
     console.log(
-      `➕ [rotary encoder] Arduino to X-Plane command mapping added: ${encoderName} -> ${ensureArray(incrementCommands).join(', ')}/${ensureArray(decrementCommands).join(', ')}`,
+      `[🏗️] ➕ [rotary encoder] Arduino to X-Plane command mapping added: ${encoderName} -> ${ensureArray(incrementCommands).join(', ')}/${ensureArray(decrementCommands).join(', ')}`,
     )
   }
 
@@ -524,7 +526,7 @@ export class XPlaneArduinoBridge {
 
       if (actionType === 'command') {
         // Execute X-Plane commands (for momentary switches/buttons)
-        this.executeXPlaneCommands(mapping.xplane_actions)
+        this.executeXPlaneCommands(mapping.xplane_actions, mapping.duration)
       } else if (actionType === 'dataref') {
         // Write X-Plane datarefs (for toggle switches)
         this.setXPlaneDataRefs(mapping.xplane_actions, mapping.value)

@@ -84,6 +84,7 @@ export type InputMapping = {
   type: InputType
   xplane_actions: string[]
   value?: any | undefined
+  duration?: number | undefined
 }
 
 export type InputMappings = {
