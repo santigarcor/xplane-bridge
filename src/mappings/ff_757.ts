@@ -25,6 +25,11 @@ export function initializeMappings(bridge: XPlaneArduinoBridge): void {
     threshold: 50,
     parser: ParserType.ROUND,
   })
+  bridge.addDataRef('sim/cockpit2/autopilot/vvi_status', {
+    arduino_cmd: 'toggle_display_set_vertical_speed',
+    threshold: 1,
+    parser: ParserType.BOOLEAN,
+  })
 
   /**
    * ENCODERS
@@ -157,6 +162,7 @@ export function initializeMappings(bridge: XPlaneArduinoBridge): void {
   /**
    * LEDS
    */
+  bridge.addBooleanDataRef('1-sim/AP/lamp/2', 'speed_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/6', 'heading_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/8', 'altitude_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/7', 'vertical_speed_led')

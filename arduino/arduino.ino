@@ -1,6 +1,7 @@
 #include <LedControl.h>
 #include <Encoder.h>
 #include <ArduinoJson.h>
+
 #define ENCODER_USE_INTERRUPTS
 
 const long BAUD_RATE = 57600;
@@ -297,6 +298,26 @@ void setDisplay(DisplayCommand displayCommand,long value) {
   }
 }
 
+/**
+ * Toggles the display off
+ */
+void toggleDisplay(String command,long value) {
+  String cmd  = command.substring(15,command.length());
+
+  if (value) {
+    return;
+  }
+
+  for (int i = 0; i < DISPLAY_COMMANDS_COUNT; i++) {
+    if (cmd == displayCommands[i].name){
+      for (int j=displayCommands[i].firstDigitPosition; j < (displayCommands[i].firstDigitPosition + displayCommands[i].maxLength); j++) {
+        lc.setRow(displayCommands[i].displayToShow, j, B00000000);
+      }
+      break;
+    }
+  }
+}
+
 void processSerialInput() {
   if (!Serial.available()) {
     return;
@@ -311,6 +332,7 @@ void processSerialInput() {
   }
 
   String cmd = doc["cmd"];
+
   // Command for displays
   if (cmd.startsWith("set_")) {
     for (int i = 0; i < DISPLAY_COMMANDS_COUNT; i++) {
@@ -319,6 +341,8 @@ void processSerialInput() {
         break;
       }
     }
+  } else if(cmd.startsWith("toggle_display")) {
+    toggleDisplay(cmd, doc["value"]);
   } else {
     // Instruction for LEDs
     int i =0;
