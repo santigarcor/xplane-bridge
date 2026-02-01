@@ -85,7 +85,7 @@ export class ArduinoSerialCommunicator {
   public sendCommand(data: ArduinoCommand): void {
     if (this.serialPort && this.serialPort.isOpen) {
       this.serialPort.write(JSON.stringify(data) + '\n')
-      console.log(`[📟] ➡️ Sent command to Arduino: ${JSON.stringify(data)}`)
+      console.log(`[⇨ 📟]Sent command to Arduino: ${JSON.stringify(data)}`)
     }
   }
 

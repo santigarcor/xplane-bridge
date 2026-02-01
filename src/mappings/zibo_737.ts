@@ -20,10 +20,15 @@ export function initializeMappings(bridge: XPlaneArduinoBridge): void {
     threshold: 100,
     parser: ParserType.ROUND,
   })
-  // Pending
-  bridge.addDataRef('laminar/autopilot/ap_vvi_dial', {
+
+  // bridge.addDataRef('laminar/autopilot/ap_vvi_dial', {
+  //   arduino_cmd: 'set_vertical_speed',
+  //   threshold: 50,
+  //   parser: ParserType.ROUND,
+  // })
+  bridge.addDataRef('laminar/B738/autopilot/course_pilot', {
     arduino_cmd: 'set_vertical_speed',
-    threshold: 50,
+    threshold: 1,
     parser: ParserType.ROUND,
   })
 
@@ -45,10 +50,21 @@ export function initializeMappings(bridge: XPlaneArduinoBridge): void {
     'laminar/B738/autopilot/altitude_up',
     'laminar/B738/autopilot/altitude_dn',
   )
+  // bridge.addRotaryEncoderCommands(
+  //   'vertical_speed_encoder',
+  //   'sim/autopilot/vertical_speed_up',
+  //   'sim/autopilot/vertical_speed_down',
+  // )
   bridge.addRotaryEncoderCommands(
     'vertical_speed_encoder',
-    'sim/autopilot/vertical_speed_up',
-    'sim/autopilot/vertical_speed_down',
+    [
+      'laminar/B738/autopilot/course_pilot_up',
+      'laminar/B738/autopilot/course_copilot_up',
+    ],
+    [
+      'laminar/B738/autopilot/course_pilot_dn',
+      'laminar/B738/autopilot/course_copilot_dn',
+    ],
   )
 
   /**
@@ -178,7 +194,7 @@ export function initializeMappings(bridge: XPlaneArduinoBridge): void {
     'vertical_speed_led',
   )
   bridge.addBooleanDataRef('laminar/B738/autopilot/lnav_status', 'l_nav_led')
-  bridge.addBooleanDataRef('laminar/B738/autopilot/vnav_status', 'v_nav_led')
+  bridge.addBooleanDataRef('laminar/B738/autopilot/vnav_status1', 'v_nav_led')
   bridge.addBooleanDataRef('laminar/B738/autopilot/vorloc_status', 'loc_led')
   bridge.addBooleanDataRef('laminar/B738/autopilot/app_status', 'app_led')
   bridge.addBooleanDataRef('laminar/B738/autopilot/cmd_a_status', 'cmd_led')

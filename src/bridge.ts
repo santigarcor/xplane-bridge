@@ -65,7 +65,7 @@ export class XPlaneArduinoBridge {
   public addDataRef(dataRefName: string, mapping: DataRefMapping): void {
     this.dataRefMappings[dataRefName] = mapping
     console.log(
-      `[🏗️] ➕ X-Plane to Arduino mapping added: ${dataRefName} -> ${mapping.arduino_cmd}` +
+      `[➕ ✈️ ⇨ 📟] X-Plane to Arduino mapping added: ${dataRefName} -> ${mapping.arduino_cmd}` +
         (mapping.threshold ? ` (threshold: ${mapping.threshold})` : '') +
         (mapping.parser ? ` (parser: ${mapping.parser})` : '') +
         (mapping.value_map
@@ -130,7 +130,7 @@ export class XPlaneArduinoBridge {
       value: inverse ? 1 : 0,
     }
     console.log(
-      `[🏗️] ➕ [toggle switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${ensureArray(dataRefNames).join(', ')}`,
+      `[➕ 📟 ⇨ ✈️] [toggle switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${ensureArray(dataRefNames).join(', ')}`,
     )
   }
 
@@ -155,7 +155,7 @@ export class XPlaneArduinoBridge {
       xplane_actions: ensureArray(offCommands || onCommands),
     }
     console.log(
-      `[🏗️] ➕ [toggle switch] Arduino to X-Plane command mapping added: ${switchName} -> ${ensureArray(onCommands).join(', ')}/${offCommands ? ensureArray(offCommands).join(', ') : ''}`,
+      `[➕ 📟 ⇨ ✈️] [toggle switch] Arduino to X-Plane command mapping added: ${switchName} -> ${ensureArray(onCommands).join(', ')}/${offCommands ? ensureArray(offCommands).join(', ') : ''}`,
     )
   }
 
@@ -177,7 +177,7 @@ export class XPlaneArduinoBridge {
     }
 
     console.log(
-      `[🏗️] ➕ [momentary switch] Arduino to X-Plane command mapping added: ${switchName} -> ${ensureArray(commands).join(', ')}`,
+      `[➕ 📟 ⇨ ✈️] [momentary switch] Arduino to X-Plane command mapping added: ${switchName} -> ${ensureArray(commands).join(', ')}`,
     )
   }
 
@@ -200,7 +200,7 @@ export class XPlaneArduinoBridge {
     }
 
     console.log(
-      `[🏗️] ➕ [momentary switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${ensureArray(dataRefNames).join(', ')}`,
+      `[➕ 📟 ⇨ ✈️] [momentary switch] Arduino to X-Plane dataref mapping added: ${switchName} -> ${ensureArray(dataRefNames).join(', ')}`,
     )
   }
 
@@ -227,7 +227,7 @@ export class XPlaneArduinoBridge {
     }
 
     console.log(
-      `[🏗️] ➕ [rotary encoder] Arduino to X-Plane command mapping added: ${encoderName} -> ${ensureArray(incrementCommands).join(', ')}/${ensureArray(decrementCommands).join(', ')}`,
+      `[➕ 📟 ⇨ ✈️] [rotary encoder] Arduino to X-Plane command mapping added: ${encoderName} -> ${ensureArray(incrementCommands).join(', ')}/${ensureArray(decrementCommands).join(', ')}`,
     )
   }
 
@@ -305,7 +305,7 @@ export class XPlaneArduinoBridge {
       console.log('---------------------------------------------')
     })
 
-    this.webSocket.on('message', this.processXPlaneUpdate.bind(this))
+    this.webSocket.on('message', this.handleXPlaneUpdate.bind(this))
 
     this.webSocket.on('close', () => {
       console.warn(
@@ -314,8 +314,8 @@ export class XPlaneArduinoBridge {
       setTimeout(() => this.initializeWebSocket(), 5000)
     })
 
-    this.webSocket.on('error', (error) => {
-      console.error('[✈️] ❌ WebSocket error: ', error)
+    this.webSocket.on('error', (error: AggregateError) => {
+      console.error(`[✈️] ❌ WebSocket error: ${error.errors.pop().message}`)
     })
   }
 
@@ -378,7 +378,7 @@ export class XPlaneArduinoBridge {
     return newValue !== oldValue
   }
 
-  private processXPlaneUpdate(rawData: RawData) {
+  private handleXPlaneUpdate(rawData: RawData) {
     try {
       const message: XplaneWebsocketMessage = JSON.parse(rawData.toString())
 
@@ -386,11 +386,13 @@ export class XPlaneArduinoBridge {
         case XPlaneMessageType.RESULT:
           if (!message.success) {
             console.error(
-              `[✈️] ❌ X-Plane request ${message.request_id} failed: ${message.error_code} - ${message.error_message}`,
+              `[✈️ ⇨ 📟] ❌ X-Plane request ${message.request_id} failed: ${message.error_code} - ${message.error_message}`,
             )
             return
           }
-          console.log(`[✈️] ✅ X-Plane request ${message.request_id} succeeded`)
+          console.log(
+            `[✈️ ⇨ 📟] ✅ X-Plane request ${message.request_id} succeeded`,
+          )
           break
         case XPlaneMessageType.DATAREF_UPDATE_VALUES:
           const updates = message.data || {}
@@ -416,7 +418,7 @@ export class XPlaneArduinoBridge {
               parsedValue = this.parseValue(updatedValue, parserType, valueMap)
             } catch (error) {
               console.error(
-                `[✈️] ❌ Error parsing value for "${dataRefName}": `,
+                `[✈️ ⇨ 📟] ❌ Error parsing value for "${dataRefName}": `,
                 error,
               )
               continue
@@ -432,7 +434,7 @@ export class XPlaneArduinoBridge {
           break
       }
     } catch (error) {
-      console.error('[✈️] ❌ Error processing X-Plane update: ', error)
+      console.error('[✈️ ⇨ 💻] ❌ Error processing X-Plane update: ', error)
       return
     }
   }
@@ -452,7 +454,9 @@ export class XPlaneArduinoBridge {
       const id = await this.getXPlaneIdentifierId('commands', xplaneCommand)
 
       if (id === null) {
-        console.error(`❌ Command "${xplaneCommand}" not found in X-Plane`)
+        console.error(
+          `[📟 ⇨ ✈️] ❌ Command "${xplaneCommand}" not found in X-Plane`,
+        )
         return
       }
       commands.push({ id, is_active: true, duration })
@@ -463,7 +467,7 @@ export class XPlaneArduinoBridge {
       { commands },
     )
     console.log(
-      `[💻] ➡️ [✈️] X-Plane commands "${xplaneCommands.join(', ')}" (Duration ${duration}, Request ID: ${requestId})`,
+      `[📟 ⇨ ✈️] X-Plane commands "${xplaneCommands.join(', ')}" (Duration ${duration}, Request ID: ${requestId})`,
     )
   }
 
@@ -476,20 +480,21 @@ export class XPlaneArduinoBridge {
       const id = await this.getXPlaneIdentifierId('datarefs', dataRefName)
 
       if (id === null) {
-        console.error(`❌ DataRef "${dataRefName}" not found in X-Plane`)
+        console.error(
+          `[📟 ⇨ ✈️] ❌ DataRef "${dataRefName}" not found in X-Plane`,
+        )
         return
       }
 
       if (value === TOGGLE_DATAREF) {
         const currentValue = await this.getDataRefValue(id, dataRefName)
-        console.log(currentValue)
         if (Number.isInteger(currentValue)) {
           value = currentValue === 0 ? 1 : 0
         } else if (typeof currentValue === 'boolean') {
           value = !currentValue
         } else {
           console.error(
-            `❌ DataRef "${dataRefName}" has non-integer/boolean value: ${currentValue}`,
+            `[📟 ⇨ ✈️] ❌ DataRef "${dataRefName}" has non-integer/boolean value: ${currentValue}`,
           )
           return
         }
@@ -503,13 +508,13 @@ export class XPlaneArduinoBridge {
       { datarefs },
     )
     console.log(
-      `[💻] ➡️ [✈️] X-Plane DataRef set: "${dataRefNames.join(', ')}" = ${value} (Request ID: ${requestId})`,
+      `[📟 ⇨ ✈️] X-Plane DataRef set: "${dataRefNames.join(', ')}" = ${value} (Request ID: ${requestId})`,
     )
   }
 
   private handleArduinoMessage(message: ArduinoMessage) {
     try {
-      console.log(`[📟] ➡️ [💻]: ${JSON.stringify(message)}`)
+      console.log(`[📟 ⇨ ✈️]: ${JSON.stringify(message)}`)
       if (!message.user_input) {
         console.warn('[📟] ⚠️ Unknown format from Arduino')
         return
@@ -531,10 +536,10 @@ export class XPlaneArduinoBridge {
         // Write X-Plane datarefs (for toggle switches)
         this.setXPlaneDataRefs(mapping.xplane_actions, mapping.value)
       } else {
-        console.error(`[📟] ❌ Unknown action type: ${actionType}`)
+        console.error(`[📟 ⇨ ✈️] ❌ Unknown action type: ${actionType}`)
       }
     } catch (error) {
-      console.error('[📟] ❌ Error handling Arduino message: ', error)
+      console.error('[📟 ⇨ ✈️] ❌ Error handling Arduino message: ', error)
     }
   }
 
