@@ -2,8 +2,8 @@ import { XPlaneArduinoBridge } from './bridge.js'
 import { initializeMappings as initFF757 } from './mappings/ff_757.js'
 import { initializeMappings as initZibo737 } from './mappings/zibo_737.js'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import readline from 'readline'
 import { select } from '@inquirer/prompts'
 
@@ -32,7 +32,7 @@ const main = async (): Promise<void> => {
   const activePlane =
     process.env.APP_ENV != 'development'
       ? await selectActivePlane()
-      : planeOptions[0]!.id
+      : process.env.ACTIVE_PLANE || 'zibo_737'
 
   switch (activePlane) {
     case 'ff_757':
