@@ -1,7 +1,6 @@
-import { XPlaneArduinoBridge } from '../bridge.js'
-import { ParserType, TOGGLE_DATAREF } from '../types.js'
+import { XPlaneBridge, ParserType, TOGGLE_DATAREF } from '../bridge/index.js'
 
-export function initializeMappings(bridge: XPlaneArduinoBridge): void {
+export function initializeMappings(bridge: XPlaneBridge): void {
   /**
    * DISPLAYS
    */

@@ -8,7 +8,7 @@ export class ArduinoSerialCommunicator {
   private isAttemptingConnection: boolean = false
 
   constructor(
-    private baudRate: number = 9600,
+    private baudRate: number = 57600,
     private onDataReceived: (data: ArduinoMessage) => void = () => {},
     private reconnect: boolean = true,
   ) {}

@@ -1,9 +1,10 @@
 import WebSocket, { type RawData } from 'ws'
-import fs from 'fs'
 import 'dotenv/config'
-import { ArduinoSerialCommunicator } from './arduino_serial_communicator.js'
+import {
+  ArduinoSerialCommunicator,
+  type ArduinoMessage,
+} from '../arduino/index.js'
 import type {
-  ArduinoMessage,
   DataRefMapping,
   DataRefMappings,
   InputMappings,
@@ -22,7 +23,7 @@ const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
     map && map[v] !== undefined ? map[v] : v,
 }
 
-export class XPlaneArduinoBridge {
+export class XPlaneBridge {
   private webSocket: WebSocket | null = null
   private arduino: ArduinoSerialCommunicator
   private requestIdCounter: number = 1
