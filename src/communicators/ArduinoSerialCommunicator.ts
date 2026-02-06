@@ -1,17 +1,24 @@
 import { SerialPort } from 'serialport'
 import { ReadlineParser } from '@serialport/parser-readline'
-import type { ArduinoCommand, ArduinoMessage } from './types.js'
+import type { OutgoingMessage, IncomingMessage, Communicator } from './types.js'
 
-export class ArduinoSerialCommunicator {
+export class ArduinoSerialCommunicator implements Communicator {
   private serialPort: SerialPort | null = null
   private parser: ReadlineParser | null = null
   private isAttemptingConnection: boolean = false
+  /**
+   * Callback that will be executed when Arduino/WebCockpit sends a user interaction
+   */
+  private onMessageReceived: (data: IncomingMessage) => void = () => {}
 
   constructor(
     private baudRate: number = 57600,
-    private onDataReceived: (data: ArduinoMessage) => void = () => {},
     private reconnect: boolean = true,
   ) {}
+
+  onMessage(onMessageReceived: (data: IncomingMessage) => void): void {
+    this.onMessageReceived = onMessageReceived
+  }
 
   async autodiscoverPort(): Promise<string | null> {
     const availablePorts = await SerialPort.list()
@@ -59,8 +66,8 @@ export class ArduinoSerialCommunicator {
 
     this.parser.on('data', (line: string) => {
       try {
-        const jsonObject: ArduinoMessage = JSON.parse(line)
-        this.onDataReceived(jsonObject)
+        const jsonObject: IncomingMessage = JSON.parse(line)
+        this.onMessageReceived(jsonObject)
       } catch (error) {
         // Ignore if not valid JSON (Arduino text logs)
       }
@@ -82,7 +89,7 @@ export class ArduinoSerialCommunicator {
     }, 5000)
   }
 
-  public sendCommand(data: ArduinoCommand): void {
+  public sendMessage(data: OutgoingMessage): void {
     if (this.serialPort && this.serialPort.isOpen) {
       this.serialPort.write(JSON.stringify(data) + '\n')
       console.log(`[⇨ 📟]Sent command to Arduino: ${JSON.stringify(data)}`)

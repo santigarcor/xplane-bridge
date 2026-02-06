@@ -3,8 +3,7 @@ import { fileURLToPath } from 'node:url'
 import readline from 'readline'
 import { select } from '@inquirer/prompts'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 import { XPlaneBridge } from './bridge/index.js'
 import {
@@ -31,7 +30,7 @@ const selectActivePlane = async (): Promise<SupportedAircraft> => {
 }
 
 const main = async (): Promise<void> => {
-  const bridge = new XPlaneBridge()
+  const bridge = new XPlaneBridge(__dirname)
   const activePlane: SupportedAircraft = await selectActivePlane()
 
   console.log(`[🏗️] 🚀 Initializing mappings for ${activePlane}`)

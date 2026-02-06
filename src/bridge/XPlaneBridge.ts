@@ -2,8 +2,9 @@ import WebSocket, { type RawData } from 'ws'
 import 'dotenv/config'
 import {
   ArduinoSerialCommunicator,
-  type ArduinoMessage,
-} from '../arduino/index.js'
+  WebCockpitServiceCommunicator,
+  type IncomingMessage,
+} from '../communicators/index.js'
 import type {
   DataRefMapping,
   DataRefMappings,
@@ -26,6 +27,7 @@ const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
 export class XPlaneBridge {
   private webSocket: WebSocket | null = null
   private arduino: ArduinoSerialCommunicator
+  private webCockpit: WebCockpitServiceCommunicator
   private requestIdCounter: number = 1
   private websocketsUrl: string
   private restUrl: string
@@ -47,14 +49,17 @@ export class XPlaneBridge {
 
   private previousValues: Record<string, any> = {}
 
-  constructor() {
+  constructor(__dirname: string) {
     this.websocketsUrl = `ws://${process.env.XPLANE_HOST}:${process.env.XPLANE_PORT}/api/v2`
     this.restUrl = `http://${process.env.XPLANE_HOST}:${process.env.XPLANE_PORT}/api/v2`
 
     this.arduino = new ArduinoSerialCommunicator(
       parseInt(process.env.ARDUINO_BAUD || '9600'),
-      (data: ArduinoMessage) => this.handleArduinoMessage(data),
       false,
+    )
+    this.webCockpit = new WebCockpitServiceCommunicator(
+      parseInt(process.env.WEBFMC_PORT || '8080'),
+      __dirname,
     )
   }
 
@@ -288,10 +293,16 @@ export class XPlaneBridge {
   public close() {
     this.webSocket?.close()
     this.arduino.disconnect()
+    this.webCockpit.disconnect()
   }
 
   public async run() {
+    this.arduino.onMessage(this.handleArduinoMessage.bind(this))
+    this.webCockpit.onMessage(this.handleArduinoMessage.bind(this))
+
     await this.arduino.connect()
+    await this.webCockpit.connect()
+
     await new Promise((resolve) => setTimeout(resolve, 2000))
     this.initializeWebSocket()
   }
@@ -429,7 +440,7 @@ export class XPlaneBridge {
               continue
             }
 
-            this.arduino.sendCommand({ cmd: arduinoCmd, value: parsedValue })
+            this.arduino.sendMessage({ cmd: arduinoCmd, value: parsedValue })
             this.previousValues[arduinoCmd] = parsedValue
           }
           break
@@ -513,7 +524,7 @@ export class XPlaneBridge {
     )
   }
 
-  private handleArduinoMessage(message: ArduinoMessage) {
+  private handleArduinoMessage(message: IncomingMessage): void {
     try {
       console.log(`[📟 ⇨ ✈️]: ${JSON.stringify(message)}`)
       if (!message.user_input) {
