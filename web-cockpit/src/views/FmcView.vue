@@ -1,25 +1,39 @@
 <script setup lang="ts">
+import { use757Store } from '@/stores/757'
 import { ref } from 'vue'
 
 const debug = ref(true)
+const store = use757Store()
 
-// Simulación de datos
-const lines = ref([
-  { text: '          IDENT      1/1', color: 'white' },
-  { text: ' MODEL           ENGINES', color: 'green' },
-  { text: '757-200      RB211-535E4', color: 'green' },
-  { text: ' NAV DATA         ACTIVE', color: 'green' },
-  { text: 'AIRAC2601 JAN22/FEB19/26', color: 'green' },
-  { text: ' MODEL VER              ', color: 'green' },
-  { text: '2.6.23                  ', color: 'green' },
-  { text: ' OP PROGRAM             ', color: 'green' },
-  { text: '1.10.11+B3265D2         ', color: 'green' },
-  { text: ' DRAG/FF                ', color: 'green' },
-  { text: '+0.0/+0.0               ', color: 'green' },
-  { text: '------------------------', color: 'green' },
-  { text: '<INDEX         POS INIT>', color: 'green' },
-  { text: '                        ', color: 'green' },
-])
+store.setDisplay(
+  '          IDENT      1/1 MODEL           ENGINES757-200      RB211-535E4 NAV DATA         ACTIVEAIRAC2601 JAN22/FEB19/26 MODEL VER              2.6.23                   OP PROGRAM             1.10.11+B3265D2          DRAG/FF                +0.0/+0.0               ------------------------<INDEX         POS INIT>                        ',
+  [
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 4, 4, 4,
+    4, 4, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 4, 4, 4, 4, 4, 4,
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4,
+    4, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 4, 4, 4, 4, 4, 4, 4,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+    4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  ],
+  [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  ],
+)
 
 const handleKey = (key: string) => {
   if (navigator.vibrate) navigator.vibrate(15)
@@ -41,19 +55,23 @@ const isPairLine = (line: number) => {
         :class="{ 'bg-blue-500/10 border border-blue-500': debug }"
       >
         <p
-          v-for="(line, i) in lines"
-          :key="i"
-          :class="{
-            'text-[#00FF00]': line.color === 'green',
-            'text-white': line.color !== 'green',
-            'text-[5.5cqi] leading-[0.5] tracking-[0.7cqi]': i == lines.length - 1,
-            'text-[5.5cqi] leading-[1.1] tracking-[0.7cqi]': i == 0,
-            'text-[4cqi] leading-[0.47]': isPairLine(i + 1) && ![0, lines.length - 1].includes(i),
-            'text-[5.5cqi] leading-none': !isPairLine(i + 1) && i !== 0,
-          }"
+          v-for="(line, lineIndex) in store.lines"
+          :key="lineIndex"
           class="whitespace-pre"
+          :class="{
+            'leading-[0.5]': lineIndex == store.lines.length - 1,
+            'leading-[0.308]':
+              isPairLine(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
+            'leading-none': !isPairLine(lineIndex + 1),
+          }"
         >
-          {{ line.text }}
+          <span
+            v-for="(char, charIndex) in line"
+            :key="charIndex"
+            :class="`${store.getSize(lineIndex, charIndex)} ${store.getColor(lineIndex, charIndex)}`"
+          >
+            {{ char }}
+          </span>
         </p>
       </div>
 
