@@ -15,6 +15,7 @@ import type {
 } from './types.js'
 import { ParserType, TOGGLE_DATAREF, XPlaneMessageType } from './types.js'
 import { ensureArray } from './helpers.js'
+import type { SupportedAircraft } from '../mappings/types.js'
 
 const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
   [ParserType.BOOLEAN]: (v) => (v > 0 ? 1 : 0),
@@ -49,7 +50,7 @@ export class XPlaneBridge {
 
   private previousValues: Record<string, any> = {}
 
-  constructor(__dirname: string) {
+  constructor(__dirname: string, activePlane: SupportedAircraft) {
     this.websocketsUrl = `ws://${process.env.XPLANE_HOST}:${process.env.XPLANE_PORT}/api/v2`
     this.restUrl = `http://${process.env.XPLANE_HOST}:${process.env.XPLANE_PORT}/api/v2`
 
@@ -60,6 +61,7 @@ export class XPlaneBridge {
     this.webCockpit = new WebCockpitServiceCommunicator(
       parseInt(process.env.WEBFMC_PORT || '8080'),
       __dirname,
+      activePlane,
     )
   }
 
@@ -420,10 +422,17 @@ export class XPlaneBridge {
             }
 
             const mapping = this.dataRefMappings[dataRefName]
-            const arduinoCmd = mapping.arduino_cmd
+            const command = mapping.arduino_cmd || mapping.web_cockpit_cmd
             const parserType = mapping.parser
             const valueMap = mapping.value_map
             const threshold = mapping.threshold || 0
+
+            if (command === undefined || command === '') {
+              console.warn(
+                `[✈️ ⇨ ⁉️] ⚠️ command not set for dataref "${dataRefName}"`,
+              )
+              continue
+            }
 
             let parsedValue = null
             try {
@@ -436,12 +445,23 @@ export class XPlaneBridge {
               continue
             }
 
-            if (!this.shouldSendUpdate(arduinoCmd, parsedValue, threshold)) {
+            if (!this.shouldSendUpdate(command, parsedValue, threshold)) {
               continue
             }
 
-            this.arduino.sendMessage({ cmd: arduinoCmd, value: parsedValue })
-            this.previousValues[arduinoCmd] = parsedValue
+            if (
+              mapping.arduino_cmd !== undefined &&
+              mapping.web_cockpit_cmd === undefined
+            ) {
+              this.arduino.sendMessage({ cmd: command, value: parsedValue })
+            } else if (
+              mapping.web_cockpit_cmd !== undefined &&
+              mapping.arduino_cmd === undefined
+            ) {
+              this.webCockpit.sendMessage({ cmd: command, value: parsedValue })
+            }
+
+            this.previousValues[command] = parsedValue
           }
           break
       }

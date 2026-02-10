@@ -3,6 +3,7 @@ import { createServer, Server as HttpServer } from 'node:http'
 import { WebSocketServer, WebSocket, type RawData } from 'ws'
 import path from 'node:path'
 import type { Communicator, IncomingMessage, OutgoingMessage } from './types.js'
+import type { SupportedAircraft } from '../mappings/types.js'
 
 export class WebCockpitServiceCommunicator implements Communicator {
   private app = express()
@@ -13,6 +14,7 @@ export class WebCockpitServiceCommunicator implements Communicator {
   constructor(
     private port: number = 8080,
     private __dirname: string,
+    private activePlane: SupportedAircraft,
   ) {
     this.server = createServer(this.app)
     this.wss = new WebSocketServer({ server: this.server })
@@ -31,6 +33,16 @@ export class WebCockpitServiceCommunicator implements Communicator {
     // 2. Handle WebSocket connections
     this.wss.on('connection', (ws: WebSocket) => {
       console.log('[ 📱🔗🌐 ] Device connected to WebCockpit')
+
+      console.log(
+        `[🌐] Sending active plane (${this.activePlane}) to WebCockpit`,
+      )
+      ws.send(
+        JSON.stringify({
+          cmd: 'set_active_plane',
+          value: this.activePlane,
+        } as OutgoingMessage),
+      )
 
       ws.on('message', (rawData: RawData) => {
         try {

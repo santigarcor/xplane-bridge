@@ -30,8 +30,8 @@ const selectActivePlane = async (): Promise<SupportedAircraft> => {
 }
 
 const main = async (): Promise<void> => {
-  const bridge = new XPlaneBridge(__dirname)
   const activePlane: SupportedAircraft = await selectActivePlane()
+  const bridge = new XPlaneBridge(__dirname, activePlane)
 
   console.log(`[🏗️] 🚀 Initializing mappings for ${activePlane}`)
   initializer[activePlane](bridge)

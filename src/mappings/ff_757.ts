@@ -170,6 +170,8 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   bridge.addBooleanDataRef('1-sim/AP/lamp/10', 'loc_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/11', 'app_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/12', 'cmd_led')
+
+  bridge.addMomentarySwitchInputDataRef('A', '1-sim/comm/FMC/key_A', 1)
 }
 
 // position_strobe

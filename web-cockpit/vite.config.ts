@@ -22,7 +22,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/ws': {
-        target: 'ws://localhost:8080',
+        target: 'ws://localhost:8088',
         ws: true,
         changeOrigin: true,
       },
