@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { use757Store } from '@/planes/ff_757/store'
+import { use757Store } from '@/planes/ff_757/stores/757'
 import { FMC_MAP } from './keys'
 
 defineEmits<{

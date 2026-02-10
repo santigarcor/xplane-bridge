@@ -33,7 +33,7 @@ const sizeMap: Record<RawDisplayFontSize, string> = {
   [RawDisplayFontSize.SMALL]: 'text-[4cqi] tracking-[1.35cqi]',
 }
 
-export const use757Store = defineStore('FF_757', () => {
+export const use737Store = defineStore('ZIBO_737', () => {
   const debug = ref(false)
   const lines = ref<string[]>([])
   const lineColors = ref<string[]>([])
@@ -57,5 +57,7 @@ export const use757Store = defineStore('FF_757', () => {
     return sizeMap[sizeNum]
   }
 
-  return { lines, lineColors, charSizes, setDisplay, getSize, getColor, debug }
+  function handleBridgeCommand(command: string, value: string | number): void {}
+
+  return { lines, lineColors, charSizes, setDisplay, getSize, getColor, debug, handleBridgeCommand }
 })

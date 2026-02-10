@@ -1,20 +1,56 @@
 import type { IncomingMessage, OutgoingMessage, SupportedAircraft } from '@/types'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { useActivePlaneStore } from './activePlane'
+import { use757Store } from '@/planes/ff_757/stores/757'
+import { use737Store } from '@/planes/zibo_737/stores/737'
 
 let webSocket: WebSocket | null = null
 
 export const useBridgeStore = defineStore('bridge', () => {
-  const activePlaneStore = useActivePlaneStore()
+  const activePlaneMapping: Record<
+    SupportedAircraft,
+    ReturnType<typeof use757Store> | ReturnType<typeof use737Store>
+  > = {
+    ff_757: use757Store(),
+    zibo_737: use737Store(),
+  }
+  const activePlane = ref<SupportedAircraft | ''>('')
+
+  const activePlaneStore = computed(() => {
+    if (activePlane.value === '') {
+      return null
+    }
+    return activePlaneMapping[activePlane.value as SupportedAircraft]
+  })
+
+  function setActivePlane(plane: SupportedAircraft): void {
+    activePlane.value = plane
+  }
+
+  function parseFmcString(raw: string): string {
+    if (!raw) return ''
+
+    return raw
+      .replace(/\x1C/g, '°') //  -> Grado
+      .replace(/\x1D/g, '□') //  -> Cuadrado (Placeholder)
+      .replace(/\x1F/g, '↕') //  -> Flecha (si aplica)
+      .replace(/</g, '‹') // Opcional: < más elegante para LSK
+      .replace(/>/g, '›') // Opcional: > más elegante para LSK
+  }
 
   function handleXPlaneUpdate(data: string): void {
     try {
       const message: IncomingMessage = JSON.parse(data)
       if (message.cmd === 'set_active_plane') {
-        activePlaneStore.setActivePlane(message.value as SupportedAircraft)
+        setActivePlane(message.value as SupportedAircraft)
         return
       }
+
+      if (message.value && typeof message.value === 'string') {
+        message.value = parseFmcString(message.value)
+      }
+
+      activePlaneStore.value?.handleBridgeCommand(message.cmd, message.value)
       console.log(`[📱 ⇨ 💻] Received data from Bridge: ${data}`)
     } catch (error) {
       console.error('[📱 ⇨ 💻] ❌ Error parsing message from Bridge:', error)
@@ -55,5 +91,11 @@ export const useBridgeStore = defineStore('bridge', () => {
     }
   }
 
-  return { initializeWebSocket, sendCommand, activePlaneStore }
+  return {
+    initializeWebSocket,
+    sendCommand,
+    activePlane: computed(() => activePlane.value),
+    setActivePlane,
+    activePlaneStore,
+  }
 })

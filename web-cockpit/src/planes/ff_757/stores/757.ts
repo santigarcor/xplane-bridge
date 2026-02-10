@@ -33,15 +33,19 @@ const sizeMap: Record<RawDisplayFontSize, string> = {
   [RawDisplayFontSize.SMALL]: 'text-[4cqi] tracking-[1.35cqi]',
 }
 
-export const use737Store = defineStore('ZIBO_737', () => {
+export const use757Store = defineStore('FF_757', () => {
   const debug = ref(false)
   const lines = ref<string[]>([])
   const lineColors = ref<string[]>([])
   const charSizes = ref<string[]>([])
 
-  function setDisplay(data: string, colors: RawDisplayColor[], sizes: RawDisplayFontSize[]) {
+  function setFmcText(data: string) {
     lines.value = data.match(/.{1,24}/g) || []
+  }
+  function setFmcColors(colors: RawDisplayColor[]) {
     lineColors.value = colors.join('').match(/.{1,24}/g) || []
+  }
+  function setFmcSizes(sizes: RawDisplayFontSize[]) {
     charSizes.value = sizes.join('').match(/.{1,24}/g) || []
   }
 
@@ -57,5 +61,17 @@ export const use737Store = defineStore('ZIBO_737', () => {
     return sizeMap[sizeNum]
   }
 
-  return { lines, lineColors, charSizes, setDisplay, getSize, getColor, debug }
+  function handleBridgeCommand(command: string, value: number | string | Array<unknown>): void {
+    if (command === 'set_fmc_text') {
+      setFmcText(value as string)
+    }
+    if (command === 'set_fmc_colors') {
+      setFmcColors(value as RawDisplayColor[])
+    }
+    if (command === 'set_fmc_sizes') {
+      setFmcSizes(value as RawDisplayFontSize[])
+    }
+  }
+
+  return { lines, lineColors, charSizes, getSize, getColor, debug, handleBridgeCommand }
 })

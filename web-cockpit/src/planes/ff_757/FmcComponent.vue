@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { use757Store } from '@/planes/ff_757/store'
+import { use757Store } from '@/planes/ff_757/stores/757'
 import { FMC_MAP } from './keys'
 
 defineEmits<{
@@ -36,13 +36,19 @@ const isPairLine = (line: number) => {
             'leading-none lg:leading-none': lineIndex == store.lines.length - 1,
           }"
         >
-          <span
-            v-for="(char, charIndex) in line"
-            :key="charIndex"
-            :class="`${store.getSize(lineIndex, charIndex)} ${store.getColor(lineIndex, charIndex)}`"
-          >
-            {{ char }}
-          </span>
+          <template v-for="(char, charIndex) in line" :key="charIndex">
+            <span
+              v-if="!['□'].includes(char)"
+              :class="`${store.getSize(lineIndex, charIndex)} ${store.getColor(lineIndex, charIndex)}`"
+            >
+              {{ char }}
+            </span>
+            <span
+              v-else
+              class="inline-block size-[2.9cqi] border-2 border-solid border-current m-0"
+              :class="`${store.getSize(lineIndex, charIndex)} ${store.getColor(lineIndex, charIndex)}`"
+            ></span>
+          </template>
         </p>
       </div>
 
