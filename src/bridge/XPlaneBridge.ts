@@ -23,6 +23,8 @@ const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
   [ParserType.TO_DEGREES]: (v) => Math.round(v * (180 / Math.PI)),
   [ParserType.VALUE_MAP]: (v, map) =>
     map && map[v] !== undefined ? map[v] : v,
+  [ParserType.NONE]: (v) => v,
+  [ParserType.BASE64DECODE]: (v) => Buffer.from(v, 'base64').toString('utf-8'),
 }
 
 export class XPlaneBridge {

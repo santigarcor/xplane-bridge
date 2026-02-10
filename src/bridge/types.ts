@@ -3,6 +3,8 @@ export enum ParserType {
   ROUND = 'round',
   TO_DEGREES = 'to_degrees',
   VALUE_MAP = 'value_map',
+  NONE = 'none',
+  BASE64DECODE = 'base64decode',
 }
 export type ParserFunction = (v: any, extra?: any) => any
 
