@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import { use757Store } from '@/planes/ff_757/stores/757'
 import { FMC_MAP } from './keys'
+import { isPair } from '@/helpers'
 
 defineEmits<{
   (e: 'keyPressed', key: string): void
 }>()
 
 const store = use757Store()
-
-const isPairLine = (line: number) => {
-  return line % 2 === 0
-}
 </script>
 
 <template>
@@ -30,9 +27,9 @@ const isPairLine = (line: number) => {
           :class="{
             'leading-[1.2]': lineIndex == 0,
             'leading-[0.2] lg:leading-[0.27]':
-              isPairLine(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
+              isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
             'leading-none':
-              !isPairLine(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
+              !isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
             'leading-none lg:leading-none': lineIndex == store.lines.length - 1,
           }"
         >

@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { use757Store } from '@/planes/ff_757/stores/757'
 import { use737Store } from '@/planes/zibo_737/stores/737'
+import { parseFmcString } from '@/helpers'
 
 let webSocket: WebSocket | null = null
 
@@ -25,17 +26,6 @@ export const useBridgeStore = defineStore('bridge', () => {
 
   function setActivePlane(plane: SupportedAircraft): void {
     activePlane.value = plane
-  }
-
-  function parseFmcString(raw: string): string {
-    if (!raw) return ''
-
-    return raw
-      .replace(/\x1C/g, '°') //  -> Grado
-      .replace(/\x1D/g, '□') //  -> Cuadrado (Placeholder)
-      .replace(/\x1F/g, '↕') //  -> Flecha (si aplica)
-      .replace(/</g, '‹') // Opcional: < más elegante para LSK
-      .replace(/>/g, '›') // Opcional: > más elegante para LSK
   }
 
   function handleXPlaneUpdate(data: string): void {
