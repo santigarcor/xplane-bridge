@@ -50,6 +50,10 @@ export const use737Store = defineStore('ZIBO_737', () => {
     if (command === 'fmc_exec_light') {
       fmcLights.value['exec'] = value === 1
     }
+
+    if (command === 'fmc_msg_light') {
+      fmcLights.value['msg'] = value === 1
+    }
   }
 
   return { lines, debug, handleBridgeCommand, fmcLights: computed(() => fmcLights.value) }

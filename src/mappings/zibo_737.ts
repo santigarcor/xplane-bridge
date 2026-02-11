@@ -257,6 +257,11 @@ export function initializeMappings(bridge: XPlaneBridge): void {
     threshold: 0,
     parser: ParserType.BOOLEAN,
   })
+  bridge.addDataRef('laminar/B738/fmc/fmc_message', {
+    web_cockpit_cmd: 'fmc_msg_light',
+    threshold: 0,
+    parser: ParserType.BOOLEAN,
+  })
 
   bridge.addMomentarySwitchInputCommand('LSK_L1', 'laminar/B738/button/fmc1_1L')
   bridge.addMomentarySwitchInputCommand('LSK_L2', 'laminar/B738/button/fmc1_2L')

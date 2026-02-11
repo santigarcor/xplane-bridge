@@ -26,11 +26,11 @@ const store = use737Store()
           class="whitespace-pre"
           :class="{
             'leading-[1.2]': lineIndex == 0,
-            'leading-[0.2] lg:leading-[0.25]':
+            'leading-[0.15] lg:leading-[0.25]':
               isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
-            'leading-[1.15] a':
+            'leading-[1.15]':
               !isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
-            'leading-none lg:leading-none': lineIndex == store.lines.length - 1,
+            'leading-[0.8] lg:leading-none': lineIndex == store.lines.length - 1,
           }"
         >
           <template v-for="(charData, charIndex) in lineData" :key="charIndex">
@@ -71,6 +71,15 @@ const store = use737Store()
         class="bg-yellow-400/58 rounded-xl absolute top-[54.2%] left-[80.6%] w-[8%] h-[1.5%] touch-none"
         :class="{ 'bg-yellow-500/10 border border-yellow-500': store.debug }"
       ></div>
+      <div
+        v-if="store.fmcLights['msg']"
+        class="flex flex-col text-[3cqi] font-bold leading-none text-yellow-400/58 absolute top-[71.2%] left-[93.3%] touch-none gap-0 items-center justify-center"
+        :class="{ 'bg-yellow-500/10 border border-yellow-500': store.debug }"
+      >
+        <span>M</span>
+        <span>S</span>
+        <span>G</span>
+      </div>
     </div>
   </div>
 </template>
