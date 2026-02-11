@@ -9,6 +9,8 @@ export const parseFmcString = (raw: string): string => {
     .replace(/\x1C/g, '°') //  -> Grado
     .replace(/\x1D/g, '□') //  -> Cuadrado (Placeholder)
     .replace(/\x1F/g, '↕') //  -> Flecha (si aplica)
+    .replace(/`/g, '°') // ` -> Grado
+    .replace(/\*/g, '□') // Cuadrado -> Placeholder
     .replace(/</g, '‹') // Opcional: < más elegante para LSK
     .replace(/>/g, '›') // Opcional: > más elegante para LSK
 }

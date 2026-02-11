@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { FMC_MAP } from './keys'
+import { isPair } from '@/helpers'
+import { FMC_MAP } from './types/737_keys'
 import { use737Store } from './stores/737'
 
 defineEmits<{
@@ -7,10 +8,6 @@ defineEmits<{
 }>()
 
 const store = use737Store()
-
-const isPairLine = (line: number) => {
-  return line % 2 === 0
-}
 </script>
 
 <template>
@@ -29,20 +26,26 @@ const isPairLine = (line: number) => {
           class="whitespace-pre"
           :class="{
             'leading-[1.2]': lineIndex == 0,
-            'leading-[0.2] lg:leading-[0.27]':
-              isPairLine(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
-            'leading-none':
-              !isPairLine(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
+            'leading-[0.2] lg:leading-[0.25]':
+              isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
+            'leading-[1.15] a':
+              !isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
             'leading-none lg:leading-none': lineIndex == store.lines.length - 1,
           }"
         >
-          <span
-            v-for="(charData, charIndex) in lineData"
-            :key="charIndex"
-            :class="`${charData.size} ${charData.color}`"
-          >
-            {{ charData.char }}
-          </span>
+          <template v-for="(charData, charIndex) in lineData" :key="charIndex">
+            <span
+              v-if="!['□'].includes(charData.char)"
+              :class="`${charData.size} ${charData.color}`"
+            >
+              {{ charData.char }}
+            </span>
+            <span
+              v-else
+              class="inline-block size-[2.7cqi] border-2 border-solid border-current m-0"
+              :class="`${charData.size} ${charData.color}`"
+            ></span>
+          </template>
         </p>
       </div>
 
@@ -63,6 +66,11 @@ const isPairLine = (line: number) => {
           {{ key.id }}
         </span>
       </button>
+      <div
+        v-if="store.fmcLights['exec']"
+        class="bg-yellow-400/58 rounded-xl absolute top-[54.2%] left-[80.6%] w-[8%] h-[1.5%] touch-none"
+        :class="{ 'bg-yellow-500/10 border border-yellow-500': store.debug }"
+      ></div>
     </div>
   </div>
 </template>

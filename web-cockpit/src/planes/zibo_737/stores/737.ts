@@ -1,60 +1,19 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-
-enum LineSuffix {
-  G = 'G',
-  GX = 'GX',
-  I = 'I',
-  L = 'L',
-  LX = 'LX',
-  M = 'M',
-  S = 'S',
-  X = 'X',
-  C = 'C',
-}
-
-const ColorMap: Record<LineSuffix, string> = {
-  [LineSuffix.G]: 'text-fmc-green',
-  [LineSuffix.GX]: 'text-fmc-green',
-  [LineSuffix.I]: 'text-black bg-white',
-  [LineSuffix.L]: 'text-white',
-  [LineSuffix.LX]: 'text-white',
-  [LineSuffix.M]: 'text-fuchsia',
-  [LineSuffix.S]: 'text-white',
-  [LineSuffix.X]: 'text-white',
-  [LineSuffix.C]: 'text-cyan',
-}
-
-const largeSize = 'text-[5.5cqi] tracking-[0.54cqi]'
-const smallSize = 'text-[4cqi] tracking-[1.16cqi]'
-
-const FontSizeMap: Record<LineSuffix, string> = {
-  [LineSuffix.G]: largeSize,
-  [LineSuffix.GX]: smallSize,
-  [LineSuffix.I]: largeSize,
-  [LineSuffix.L]: largeSize,
-  [LineSuffix.LX]: smallSize,
-  [LineSuffix.M]: largeSize,
-  [LineSuffix.S]: smallSize,
-  [LineSuffix.X]: smallSize,
-  [LineSuffix.C]: largeSize,
-}
-
-type LineCharData = {
-  char: string
-  color: string
-  size: string
-}
+import { parseFmcString } from '@/helpers'
+import { ColorMap, FontSizeMap, LineSuffix, type LineCharData } from './737_store_types'
 
 export const use737Store = defineStore('ZIBO_737', () => {
   const debug = ref(false)
   const rawLinesData = ref<Record<string, string>>({})
-  const rawLineKeys = computed(() => Object.keys(rawLinesData.value))
+  const fmcLights = ref<Record<string, boolean>>({})
   const lines = computed(() => {
-    return Array.from({ length: 14 }, (_, i) => ' '.repeat(24)).map((emptyLine, index) => {
+    let secondaryLineSubstractor = 0
+    return Array.from({ length: 14 }, () => ' '.repeat(24)).map((emptyLine, index) => {
       const isMainLine = index % 2 === 0 || index === 0 || index === 13
-      const rawLineNumber = (index % 2 === 0 ? index : index - 1) / 2
-      const filteredRawLineKeys = rawLineKeys.value.filter(
+      const rawLineNumber = isMainLine ? Math.ceil(index / 2) : index - secondaryLineSubstractor++
+      // const rawLineNumber = (index % 2 === 0 ? index : index - 1) / 2
+      const filteredRawLineKeys = Object.keys(rawLinesData.value).filter(
         (lineKey) =>
           parseInt(lineKey.split('_')[0]!, 10) === rawLineNumber &&
           (isMainLine ? !lineKey.endsWith('X') : lineKey.endsWith('X')),
@@ -82,16 +41,16 @@ export const use737Store = defineStore('ZIBO_737', () => {
     })
   })
 
-  function setRawLine(lineKey: string, value: string) {
-    rawLinesData.value[lineKey] = value
-  }
-
   function handleBridgeCommand(command: string, value: string | number): void {
     if (command.startsWith('fmc_line-')) {
       const lineKey = command.split('-').pop() as string
-      setRawLine(lineKey, value.toString())
+      rawLinesData.value[lineKey] = parseFmcString(value.toString())
+    }
+
+    if (command === 'fmc_exec_light') {
+      fmcLights.value['exec'] = value === 1
     }
   }
 
-  return { lines, setRawLine, debug, handleBridgeCommand }
+  return { lines, debug, handleBridgeCommand, fmcLights: computed(() => fmcLights.value) }
 })

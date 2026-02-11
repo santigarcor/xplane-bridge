@@ -9,8 +9,8 @@ const planeStore = computed(() => bridgeStore.activePlaneStore)
 
 onMounted(() => {
   init()
-  bridgeStore.setActivePlane('zibo_737')
-  planeStore.value!.debug = true
+  // bridgeStore.setActivePlane('zibo_737')
+  // planeStore.value!.debug = true
 })
 watch(activePlane, init)
 

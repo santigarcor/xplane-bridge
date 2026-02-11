@@ -36,10 +36,6 @@ export const useBridgeStore = defineStore('bridge', () => {
         return
       }
 
-      if (message.value && typeof message.value === 'string') {
-        message.value = parseFmcString(message.value)
-      }
-
       activePlaneStore.value?.handleBridgeCommand(message.cmd, message.value)
       console.log(`[📱 ⇨ 💻] Received data from Bridge: ${data}`)
     } catch (error) {

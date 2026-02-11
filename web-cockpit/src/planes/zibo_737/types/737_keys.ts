@@ -70,13 +70,13 @@ const NUM_KEYS: FmcKey[] = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0
 const FUNC_KEYS1: FmcKey[] = [
   'INIT_REF',
   'RTE',
-  'CLB',
-  'CRZ',
-  'DES',
-  'DIR_INTC',
-  'LEGS',
   'DEP_ARR',
+  'ATC',
+  'VNAV',
+  'FIX',
+  'LEGS',
   'HOLD',
+  'FMC_COMM',
   'PROG',
 ].map((key, index) => ({
   id: key,
@@ -86,7 +86,7 @@ const FUNC_KEYS1: FmcKey[] = [
   height: 5.5,
 }))
 
-const FUNC_KEYS2: FmcKey[] = ['MENU', 'FIX', 'PREV_PAGE', 'NEXT_PAGE'].map((key, index) => ({
+const FUNC_KEYS2: FmcKey[] = ['MENU', 'N1_LIMIT', 'PREV_PAGE', 'NEXT_PAGE'].map((key, index) => ({
   id: key,
   top: 61.4 + Math.floor(index / 2) * 6.4,
   left: 10.5 + (index % 2) * 12.9,

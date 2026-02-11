@@ -198,6 +198,10 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   bridge.addBooleanDataRef('laminar/B738/autopilot/app_status', 'app_led')
   bridge.addBooleanDataRef('laminar/B738/autopilot/cmd_a_status', 'cmd_led')
 
+  /**
+   * FMC
+   */
+
   Array.from({ length: 6 }, (_, i) => i + 1).forEach((lineNumber) => {
     ;[
       'laminar/B738/fmc1/Line0#_G',
@@ -239,8 +243,114 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   })
 
   bridge.addDataRef('laminar/B738/fmc1/Line_entry', {
-    web_cockpit_cmd: 'fmc_line_entry',
+    web_cockpit_cmd: 'fmc_line-07_L',
     threshold: 0,
     parser: ParserType.BASE64DECODE,
   })
+  bridge.addDataRef('laminar/B738/fmc1/Line_entry_I', {
+    web_cockpit_cmd: 'fmc_line-07_I',
+    threshold: 0,
+    parser: ParserType.BASE64DECODE,
+  })
+  bridge.addDataRef('laminar/B738/fmod/fmc_exec_lights', {
+    web_cockpit_cmd: 'fmc_exec_light',
+    threshold: 0,
+    parser: ParserType.BOOLEAN,
+  })
+
+  bridge.addMomentarySwitchInputCommand('LSK_L1', 'laminar/B738/button/fmc1_1L')
+  bridge.addMomentarySwitchInputCommand('LSK_L2', 'laminar/B738/button/fmc1_2L')
+  bridge.addMomentarySwitchInputCommand('LSK_L3', 'laminar/B738/button/fmc1_3L')
+  bridge.addMomentarySwitchInputCommand('LSK_L4', 'laminar/B738/button/fmc1_4L')
+  bridge.addMomentarySwitchInputCommand('LSK_L5', 'laminar/B738/button/fmc1_5L')
+  bridge.addMomentarySwitchInputCommand('LSK_L6', 'laminar/B738/button/fmc1_6L')
+  bridge.addMomentarySwitchInputCommand('LSK_R1', 'laminar/B738/button/fmc1_1R')
+  bridge.addMomentarySwitchInputCommand('LSK_R2', 'laminar/B738/button/fmc1_2R')
+  bridge.addMomentarySwitchInputCommand('LSK_R3', 'laminar/B738/button/fmc1_3R')
+  bridge.addMomentarySwitchInputCommand('LSK_R4', 'laminar/B738/button/fmc1_4R')
+  bridge.addMomentarySwitchInputCommand('LSK_R5', 'laminar/B738/button/fmc1_5R')
+  bridge.addMomentarySwitchInputCommand('LSK_R6', 'laminar/B738/button/fmc1_6R')
+
+  bridge.addMomentarySwitchInputCommand(
+    'INIT_REF',
+    'laminar/B738/button/fmc1_init_ref',
+  )
+  bridge.addMomentarySwitchInputCommand('RTE', 'laminar/B738/button/fmc1_rte')
+  bridge.addMomentarySwitchInputCommand(
+    'DEP_ARR',
+    'laminar/B738/button/fmc1_clb',
+  )
+  bridge.addMomentarySwitchInputCommand('ATC', 'laminar/B738/button/fmc1_crz')
+  bridge.addMomentarySwitchInputCommand('VNAV', 'laminar/B738/button/fmc1_des')
+  bridge.addMomentarySwitchInputCommand('FIX', 'laminar/B738/button/fmc1_menu')
+  bridge.addMomentarySwitchInputCommand('LEGS', 'laminar/B738/button/fmc1_legs')
+  bridge.addMomentarySwitchInputCommand(
+    'HOLD',
+    'laminar/B738/button/fmc1_dep_app',
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'FMC_COMM',
+    'laminar/B738/button/fmc1_hold',
+  )
+  bridge.addMomentarySwitchInputCommand('PROG', 'laminar/B738/button/fmc1_prog')
+  bridge.addMomentarySwitchInputCommand(
+    'MENU',
+    'laminar/B738/button/fmc1_n1_limit',
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'N1_LIMIT',
+    'laminar/B738/button/fmc1_fix',
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'PREV_PAGE',
+    'laminar/B738/button/fmc1_prev_page',
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'NEXT_PAGE',
+    'laminar/B738/button/fmc1_next_page',
+  )
+  bridge.addMomentarySwitchInputCommand('EXEC', 'laminar/B738/button/fmc1_exec')
+
+  bridge.addMomentarySwitchInputCommand('A', 'laminar/B738/button/fmc1_A')
+  bridge.addMomentarySwitchInputCommand('B', 'laminar/B738/button/fmc1_B')
+  bridge.addMomentarySwitchInputCommand('C', 'laminar/B738/button/fmc1_C')
+  bridge.addMomentarySwitchInputCommand('D', 'laminar/B738/button/fmc1_D')
+  bridge.addMomentarySwitchInputCommand('E', 'laminar/B738/button/fmc1_E')
+  bridge.addMomentarySwitchInputCommand('F', 'laminar/B738/button/fmc1_F')
+  bridge.addMomentarySwitchInputCommand('G', 'laminar/B738/button/fmc1_G')
+  bridge.addMomentarySwitchInputCommand('H', 'laminar/B738/button/fmc1_H')
+  bridge.addMomentarySwitchInputCommand('I', 'laminar/B738/button/fmc1_I')
+  bridge.addMomentarySwitchInputCommand('J', 'laminar/B738/button/fmc1_J')
+  bridge.addMomentarySwitchInputCommand('K', 'laminar/B738/button/fmc1_K')
+  bridge.addMomentarySwitchInputCommand('L', 'laminar/B738/button/fmc1_L')
+  bridge.addMomentarySwitchInputCommand('M', 'laminar/B738/button/fmc1_M')
+  bridge.addMomentarySwitchInputCommand('N', 'laminar/B738/button/fmc1_N')
+  bridge.addMomentarySwitchInputCommand('O', 'laminar/B738/button/fmc1_O')
+  bridge.addMomentarySwitchInputCommand('P', 'laminar/B738/button/fmc1_P')
+  bridge.addMomentarySwitchInputCommand('Q', 'laminar/B738/button/fmc1_Q')
+  bridge.addMomentarySwitchInputCommand('R', 'laminar/B738/button/fmc1_R')
+  bridge.addMomentarySwitchInputCommand('S', 'laminar/B738/button/fmc1_S')
+  bridge.addMomentarySwitchInputCommand('T', 'laminar/B738/button/fmc1_T')
+  bridge.addMomentarySwitchInputCommand('U', 'laminar/B738/button/fmc1_U')
+  bridge.addMomentarySwitchInputCommand('V', 'laminar/B738/button/fmc1_V')
+  bridge.addMomentarySwitchInputCommand('W', 'laminar/B738/button/fmc1_W')
+  bridge.addMomentarySwitchInputCommand('X', 'laminar/B738/button/fmc1_X')
+  bridge.addMomentarySwitchInputCommand('Y', 'laminar/B738/button/fmc1_Y')
+  bridge.addMomentarySwitchInputCommand('Z', 'laminar/B738/button/fmc1_Z')
+  bridge.addMomentarySwitchInputCommand('SP', 'laminar/B738/button/fmc1_SP')
+  bridge.addMomentarySwitchInputCommand('DEL', 'laminar/B738/button/fmc1_del')
+  bridge.addMomentarySwitchInputCommand('/', 'laminar/B738/button/fmc1_slash')
+  bridge.addMomentarySwitchInputCommand('CLR', 'laminar/B738/button/fmc1_clr')
+  bridge.addMomentarySwitchInputCommand('1', 'laminar/B738/button/fmc1_1')
+  bridge.addMomentarySwitchInputCommand('2', 'laminar/B738/button/fmc1_2')
+  bridge.addMomentarySwitchInputCommand('3', 'laminar/B738/button/fmc1_3')
+  bridge.addMomentarySwitchInputCommand('4', 'laminar/B738/button/fmc1_4')
+  bridge.addMomentarySwitchInputCommand('5', 'laminar/B738/button/fmc1_5')
+  bridge.addMomentarySwitchInputCommand('6', 'laminar/B738/button/fmc1_6')
+  bridge.addMomentarySwitchInputCommand('7', 'laminar/B738/button/fmc1_7')
+  bridge.addMomentarySwitchInputCommand('8', 'laminar/B738/button/fmc1_8')
+  bridge.addMomentarySwitchInputCommand('9', 'laminar/B738/button/fmc1_9')
+  bridge.addMomentarySwitchInputCommand('0', 'laminar/B738/button/fmc1_0')
+  bridge.addMomentarySwitchInputCommand('.', 'laminar/B738/button/fmc1_period')
+  bridge.addMomentarySwitchInputCommand('+/-', 'laminar/B738/button/fmc1_minus')
 }
