@@ -402,12 +402,12 @@ export class XPlaneBridge {
         case XPlaneMessageType.RESULT:
           if (!message.success) {
             console.error(
-              `[✈️ ⇨ 📟] ❌ X-Plane request ${message.request_id} failed: ${message.error_code} - ${message.error_message}`,
+              `[✈️ ⇨ 📟] ❌ X-Plane request ${message.req_id} failed: ${message.error_code} - ${message.error_message}`,
             )
             return
           }
           console.log(
-            `[✈️ ⇨ 📟] ✅ X-Plane request ${message.request_id} succeeded`,
+            `[✈️ ⇨ 📟] ✅ X-Plane request ${message.req_id} succeeded`,
           )
           break
         case XPlaneMessageType.DATAREF_UPDATE_VALUES:

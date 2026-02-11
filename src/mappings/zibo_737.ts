@@ -197,4 +197,50 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   bridge.addBooleanDataRef('laminar/B738/autopilot/vorloc_status', 'loc_led')
   bridge.addBooleanDataRef('laminar/B738/autopilot/app_status', 'app_led')
   bridge.addBooleanDataRef('laminar/B738/autopilot/cmd_a_status', 'cmd_led')
+
+  Array.from({ length: 6 }, (_, i) => i + 1).forEach((lineNumber) => {
+    ;[
+      'laminar/B738/fmc1/Line0#_G',
+      'laminar/B738/fmc1/Line0#_GX',
+      'laminar/B738/fmc1/Line0#_I',
+      'laminar/B738/fmc1/Line0#_L',
+      'laminar/B738/fmc1/Line0#_LX',
+      'laminar/B738/fmc1/Line0#_M',
+      'laminar/B738/fmc1/Line0#_S',
+      'laminar/B738/fmc1/Line0#_X',
+    ].forEach((dataRefTemplate) => {
+      const dataRef = dataRefTemplate.replace('#', lineNumber.toString())
+      const suffix = dataRef.split('_').pop() as string
+      const webCockpitCmd = `fmc_line-${lineNumber}_${suffix}`
+
+      bridge.addDataRef(dataRef, {
+        web_cockpit_cmd: webCockpitCmd,
+        threshold: 0,
+        parser: ParserType.BASE64DECODE,
+      })
+    })
+  })
+  ;[
+    'laminar/B738/fmc1/Line00_C',
+    'laminar/B738/fmc1/Line00_G',
+    'laminar/B738/fmc1/Line00_I',
+    'laminar/B738/fmc1/Line00_L',
+    'laminar/B738/fmc1/Line00_M',
+    'laminar/B738/fmc1/Line00_S',
+  ].forEach((dataRef) => {
+    const suffix = dataRef.split('_').pop() as string
+    const webCockpitCmd = `fmc_line-00_${suffix}`
+
+    bridge.addDataRef(dataRef, {
+      web_cockpit_cmd: webCockpitCmd,
+      threshold: 0,
+      parser: ParserType.BASE64DECODE,
+    })
+  })
+
+  bridge.addDataRef('laminar/B738/fmc1/Line_entry', {
+    web_cockpit_cmd: 'fmc_line_entry',
+    threshold: 0,
+    parser: ParserType.BASE64DECODE,
+  })
 }

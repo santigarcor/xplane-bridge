@@ -42,6 +42,7 @@ export type XPlaneIdentifierType = 'datarefs' | 'commands'
 export type XplaneWebsocketMessage = {
   type: XPlaneMessageType
   request_id?: number | undefined
+  req_id?: number | undefined
   data?: Record<string, any> | undefined
   success?: boolean | undefined
   error_code?: string | undefined
