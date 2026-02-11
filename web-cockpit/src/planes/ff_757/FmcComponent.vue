@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { use757Store } from '@/planes/ff_757/stores/757'
-import { FMC_MAP } from './keys'
+import { FMC_MAP } from './types/757_keys'
 import { isPair } from '@/helpers'
 
 defineEmits<{
