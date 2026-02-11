@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { use757Store } from '@/planes/ff_757/stores/757'
 import { FMC_MAP } from './keys'
+import { use737Store } from './stores/737'
 
 defineEmits<{
   (e: 'keyPressed', key: string): void
 }>()
 
-const store = use757Store()
+const store = use737Store()
 
 const isPairLine = (line: number) => {
   return line % 2 === 0
@@ -17,14 +17,14 @@ const isPairLine = (line: number) => {
   <div
     class="fmc-container relative w-full lg:max-w-125 mx-auto aspect-271/415 shadow-2xl bg-black"
   >
-    <img src="./assets/757fmc.png" class="absolute inset-0 w-full h-full object-fill" />
+    <img src="./assets/737fmc.png" class="absolute inset-0 w-full h-full object-fill" />
     <div class="absolute inset-0 z-10">
       <div
-        class="absolute top-[6%] left-[15%] w-[70%] h-[38.5%] font-fmc flex flex-col justify-start gap-0 -pt-1 pointer-events-none touch-none"
+        class="absolute top-[5.5%] left-[16.9%] w-[66%] h-[36.9%] font-fmc flex flex-col justify-start gap-0 -pt-1 pointer-events-none touch-none"
         :class="{ 'bg-blue-500/10 border border-blue-500': store.debug }"
       >
         <p
-          v-for="(line, lineIndex) in store.lines"
+          v-for="(lineData, lineIndex) in store.lines"
           :key="lineIndex"
           class="whitespace-pre"
           :class="{
@@ -37,11 +37,11 @@ const isPairLine = (line: number) => {
           }"
         >
           <span
-            v-for="(char, charIndex) in line"
+            v-for="(charData, charIndex) in lineData"
             :key="charIndex"
-            :class="`${store.getSize(lineIndex, charIndex)} ${store.getColor(lineIndex, charIndex)}`"
+            :class="`${charData.size} ${charData.color}`"
           >
-            {{ char }}
+            {{ charData.char }}
           </span>
         </p>
       </div>
