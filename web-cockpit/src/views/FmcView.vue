@@ -7,21 +7,14 @@ const bridgeStore = useBridgeStore()
 const activePlane = computed(() => bridgeStore.activePlane)
 const planeStore = computed(() => bridgeStore.activePlaneStore)
 
-onMounted(() => {
-  init()
-  // bridgeStore.setActivePlane('zibo_737')
-  // planeStore.value!.debug = true
-})
-watch(activePlane, init)
+onMounted(() => init())
+watch(activePlane, () => init())
 
 function init() {
   if (activePlane.value === '' || planeStore.value === null) {
     console.log('No active plane selected')
     return
   }
-
-  console.log('FMC View mounted with active plane:', activePlane.value)
-  planeStore.value.debug = false
 }
 
 const dynamicComponent = computed(() => {
@@ -39,11 +32,15 @@ function handleKeyPressed(key: string) {
 </script>
 
 <template>
-  <component
-    v-if="dynamicComponent !== null"
-    :is="dynamicComponent"
-    @key-pressed="handleKeyPressed"
-  />
+  <div
+    class="image-container relative w-full lg:max-w-120 mx-auto aspect-271/415 shadow-2xl bg-black"
+  >
+    <component
+      v-if="dynamicComponent !== null"
+      :is="dynamicComponent"
+      @key-pressed="handleKeyPressed"
+    />
+  </div>
 </template>
 
 <style scoped></style>

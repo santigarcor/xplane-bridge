@@ -1,4 +1,4 @@
-export type FmcKey = {
+export type CockpitImageKey = {
   id: string // ID que recibirá el Bridge (ej: 'LSK_L1', 'KEY_A')
   top: number // % desde arriba
   left: number // % desde la izquierda

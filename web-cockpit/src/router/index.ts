@@ -1,4 +1,3 @@
-import HomeView from '@/views/HomeView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -7,7 +6,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      redirect: '/fmc',
     },
     {
       path: '/fmc',
@@ -16,6 +15,14 @@ const router = createRouter({
       // this generates a separate chunk (Fmc.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/FmcView.vue'),
+    },
+    {
+      path: '/nav',
+      name: 'NAV',
+      // route level code-splitting
+      // this generates a separate chunk (Nav.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import('../views/NavView.vue'),
     },
   ],
 })

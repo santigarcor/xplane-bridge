@@ -300,7 +300,7 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   bridge.addMomentarySwitchInputCommand('PROG', 'laminar/B738/button/fmc1_prog')
   bridge.addMomentarySwitchInputCommand(
     'MENU',
-    'laminar/B738/button/fmc1_n1_limit',
+    'laminar/B738/button/fmc1_n1_lim',
   )
   bridge.addMomentarySwitchInputCommand(
     'N1_LIMIT',

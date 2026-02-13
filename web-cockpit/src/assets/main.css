@@ -6,3 +6,8 @@
   --color-fmc-green: #00ff00;
   --color-fmc-dark: #0a0a0a;
 }
+
+
+.image-container {
+  container-type: inline-size;
+}
