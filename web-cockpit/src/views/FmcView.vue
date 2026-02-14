@@ -33,7 +33,7 @@ function handleKeyPressed(key: string) {
 
 <template>
   <div
-    class="image-container relative w-full lg:max-w-120 mx-auto aspect-271/415 shadow-2xl bg-black"
+    class="image-container relative w-full lg:max-w-100 xl:max-w-120 mx-auto aspect-271/415 shadow-2xl bg-black"
   >
     <component
       v-if="dynamicComponent !== null"
