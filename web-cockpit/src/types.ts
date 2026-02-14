@@ -22,4 +22,11 @@ export type IncomingMessage = {
   value: number | string
 }
 
+export enum WebSocketStatus {
+  CONNECTED = 'connected',
+  DISCONNECTED = 'disconnected',
+  RECONNECTING = 'disconnected - attempting to reconnect',
+  ERROR = 'error',
+}
+
 export type SupportedAircraft = 'ff_757' | 'zibo_737'
