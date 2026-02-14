@@ -28,6 +28,11 @@ export class WebCockpitServiceCommunicator implements Communicator {
     // 1. Serve the static files for the web cockpit (Vue app) from the public directory.
     const publicPath = path.join(this.__dirname, '..', 'public')
     this.app.use(express.static(publicPath))
+    this.app.use((req, res, next) => {
+      res
+        .status(200)
+        .sendFile(path.join(this.__dirname, '..', 'public', 'index.html'))
+    })
     console.log(`[🌐] Serving WebCockpit static files from ${publicPath}`)
 
     // 2. Handle WebSocket connections
