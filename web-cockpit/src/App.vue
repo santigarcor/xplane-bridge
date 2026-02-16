@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { useBridgeStore } from '@/stores/bridge'
+import { useWebCockpitStore } from '@/stores/web_cockpit_store'
 import { onMounted, ref } from 'vue'
 import PhoneIcon from './components/icons/PhoneIcon.vue'
 import RadioIcon from './components/icons/RadioIcon.vue'
@@ -22,12 +22,12 @@ const routes = [
 const mobileSidebarOpen = ref(false)
 const desktopSidebarOpen = ref(true)
 
-const bridgeStore = useBridgeStore()
-bridgeStore.initializeWebSocket()
+const webCockpitStore = useWebCockpitStore()
 
 onMounted(() => {
-  console.log('App mounted, initializing bridge store')
-  // bridgeStore.setActivePlane('zibo_737')
+  console.log('App mounted, initializing web cockpit store')
+  webCockpitStore.initializeWebSocket()
+  // webCockpitStore.setActivePlane('zibo_737')
 })
 </script>
 
@@ -202,21 +202,24 @@ onMounted(() => {
                 />
               </svg>
               <span>{{
-                bridgeStore.activePlane !== '' ? bridgeStore.activePlane : 'No plane selected'
+                webCockpitStore.activePlane !== ''
+                  ? webCockpitStore.activePlane
+                  : 'No plane selected'
               }}</span>
             </div>
             <div
               class="inline-flex rounded-sm px-2 py-1 text-xs leading-4 font-semibold"
               :class="{
                 'bg-emerald-200 text-emerald-700':
-                  bridgeStore.wsStatus === WebSocketStatus.CONNECTED,
+                  webCockpitStore.wsStatus === WebSocketStatus.CONNECTED,
                 'bg-orange-200 text-orange-700':
-                  bridgeStore.wsStatus === WebSocketStatus.RECONNECTING,
-                'bg-red-200 text-red-700': bridgeStore.wsStatus === WebSocketStatus.ERROR,
-                'bg-gray-200 text-gray-700': bridgeStore.wsStatus === WebSocketStatus.DISCONNECTED,
+                  webCockpitStore.wsStatus === WebSocketStatus.RECONNECTING,
+                'bg-red-200 text-red-700': webCockpitStore.wsStatus === WebSocketStatus.ERROR,
+                'bg-gray-200 text-gray-700':
+                  webCockpitStore.wsStatus === WebSocketStatus.DISCONNECTED,
               }"
             >
-              {{ bridgeStore.wsStatus }}
+              {{ webCockpitStore.wsStatus }}
             </div>
           </div>
           <!-- END Status -->
@@ -239,9 +242,11 @@ onMounted(() => {
           <!-- Debug -->
           <button
             class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
-            @click="bridgeStore.toggleDebugMode()"
+            :class="{ 'bg-emerald-100/20!': webCockpitStore.debug }"
+            @click="webCockpitStore.toggleDebugMode()"
           >
             <svg
+              :class="{ 'text-emerald-500': webCockpitStore.debug }"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="none"
@@ -270,7 +275,7 @@ onMounted(() => {
           <!-- Refresh -->
           <button
             class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
-            @click="bridgeStore.reInitializeWebSocket()"
+            @click="webCockpitStore.reInitializeWebSocket()"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { useBridgeStore } from '@/stores/bridge'
+import { useWebCockpitStore } from '@/stores/web_cockpit_store'
 import { computed, defineAsyncComponent, onMounted, watch } from 'vue'
 
-const bridgeStore = useBridgeStore()
+const webCockpitStore = useWebCockpitStore()
 
-const activePlane = computed(() => bridgeStore.activePlane)
-const planeStore = computed(() => bridgeStore.activePlaneStore)
+const activePlane = computed(() => webCockpitStore.activePlane)
+const planeStore = computed(() => webCockpitStore.activePlaneStore)
 
 onMounted(() => init())
 watch(activePlane, () => init())
@@ -27,7 +27,7 @@ const dynamicComponent = computed(() => {
 function handleKeyPressed(key: string) {
   if (navigator.vibrate) navigator.vibrate(15)
   console.log('Key pressed in FMC View:', key)
-  bridgeStore.sendCommand(key)
+  webCockpitStore.sendCommand(key)
 }
 </script>
 

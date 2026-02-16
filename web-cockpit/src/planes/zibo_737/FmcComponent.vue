@@ -18,16 +18,16 @@ const store = use737Store()
       :class="{ 'bg-blue-500/10 border border-blue-500': store.debug }"
     >
       <p
-        v-for="(lineData, lineIndex) in store.lines"
+        v-for="(lineData, lineIndex) in store.fmcLines"
         :key="lineIndex"
         class="whitespace-pre"
         :class="{
           'leading-[1.2]': lineIndex == 0,
           'leading-[0.15] lg:leading-[0.25]':
-            isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
+            isPair(lineIndex + 1) && ![0, store.fmcLines.length - 1].includes(lineIndex),
           'leading-[1.15]':
-            !isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
-          'leading-[0.8] lg:leading-none': lineIndex == store.lines.length - 1,
+            !isPair(lineIndex + 1) && ![0, store.fmcLines.length - 1].includes(lineIndex),
+          'leading-[0.8] lg:leading-none': lineIndex == store.fmcLines.length - 1,
         }"
       >
         <template v-for="(charData, charIndex) in lineData" :key="charIndex">

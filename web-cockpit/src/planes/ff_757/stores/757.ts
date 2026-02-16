@@ -5,12 +5,12 @@ import { ColorMap, RawDisplayColor, RawDisplayFontSize, SizeMap } from './757_st
 
 export const use757Store = defineStore('FF_757', () => {
   const debug = ref(false)
-  const lines = ref<string[]>([])
+  const fmcLines = ref<string[]>([])
   const lineColors = ref<string[]>([])
   const charSizes = ref<string[]>([])
 
   function setFmcText(data: string) {
-    lines.value = data.match(/.{1,24}/g) || []
+    fmcLines.value = data.match(/.{1,24}/g) || []
   }
   function setFmcColors(colors: RawDisplayColor[]) {
     lineColors.value = colors.join('').match(/.{1,24}/g) || []
@@ -43,5 +43,5 @@ export const use757Store = defineStore('FF_757', () => {
     }
   }
 
-  return { lines, lineColors, charSizes, getSize, getColor, debug, handleBridgeCommand }
+  return { fmcLines, lineColors, charSizes, getSize, getColor, debug, handleBridgeCommand }
 })

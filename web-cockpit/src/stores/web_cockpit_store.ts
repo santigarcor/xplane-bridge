@@ -8,11 +8,10 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { use757Store } from '@/planes/ff_757/stores/757'
 import { use737Store } from '@/planes/zibo_737/stores/737'
-import { parseFmcString } from '@/helpers'
 
 const webSocket = ref<WebSocket | null>(null)
 
-export const useBridgeStore = defineStore('bridge', () => {
+export const useWebCockpitStore = defineStore('web_cockpit', () => {
   const wsStatus = ref<WebSocketStatus>(WebSocketStatus.DISCONNECTED)
   const activePlaneMapping: Record<
     SupportedAircraft,
@@ -107,6 +106,7 @@ export const useBridgeStore = defineStore('bridge', () => {
     reInitializeWebSocket,
     sendCommand,
     activePlane: computed(() => activePlane.value),
+    debug: computed(() => activePlaneStore.value?.debug ?? false),
     setActivePlane,
     activePlaneStore,
     wsStatus,

@@ -25,7 +25,7 @@ export type IncomingMessage = {
 export enum WebSocketStatus {
   CONNECTED = 'connected',
   DISCONNECTED = 'disconnected',
-  RECONNECTING = 'disconnected - attempting to reconnect',
+  RECONNECTING = 'reconnecting',
   ERROR = 'error',
 }
 

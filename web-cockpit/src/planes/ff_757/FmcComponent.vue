@@ -18,16 +18,16 @@ const store = use757Store()
       :class="{ 'bg-blue-500/10 border border-blue-500': store.debug }"
     >
       <p
-        v-for="(line, lineIndex) in store.lines"
+        v-for="(line, lineIndex) in store.fmcLines"
         :key="lineIndex"
         class="whitespace-pre"
         :class="{
           'leading-[1.2]': lineIndex == 0,
           'leading-[0.2] lg:leading-[0.27]':
-            isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
+            isPair(lineIndex + 1) && ![0, store.fmcLines.length - 1].includes(lineIndex),
           'leading-none':
-            !isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
-          'leading-none lg:leading-none': lineIndex == store.lines.length - 1,
+            !isPair(lineIndex + 1) && ![0, store.fmcLines.length - 1].includes(lineIndex),
+          'leading-none lg:leading-none': lineIndex == store.fmcLines.length - 1,
         }"
       >
         <template v-for="(char, charIndex) in line" :key="charIndex">
