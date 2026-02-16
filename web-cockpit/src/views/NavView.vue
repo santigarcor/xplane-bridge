@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { useBridgeStore } from '@/stores/bridge'
+import { useWebCockpitStore } from '@/stores/web_cockpit_store'
 import { computed, defineAsyncComponent } from 'vue'
 
-const bridgeStore = useBridgeStore()
+const webCockpitStore = useWebCockpitStore()
 
-const activePlane = computed(() => bridgeStore.activePlane)
+const activePlane = computed(() => webCockpitStore.activePlane)
 
 const dynamicComponent = computed(() => {
   if (activePlane.value === '') {
@@ -16,7 +16,7 @@ const dynamicComponent = computed(() => {
 function handleKeyPressed(key: string) {
   if (navigator.vibrate) navigator.vibrate(15)
   console.log('Key pressed in NAV View:', key)
-  bridgeStore.sendCommand(key)
+  webCockpitStore.sendCommand(key)
 }
 </script>
 

@@ -2,6 +2,7 @@
 import { isPair } from '@/helpers'
 import { NAV_MAP } from './types/737_keys'
 import { use737Store } from './stores/737'
+import { NavFrequencyModes } from './stores/737_store_types'
 
 defineEmits<{
   (e: 'keyPressed', key: string): void
@@ -17,67 +18,30 @@ const store = use737Store()
       <div class="absolute inset-0 z-10">
         <!-- 43 18.9 18.9 17.5 -->
         <div
-          class="absolute top-[18.9%] left-[18.9%] w-[43%] h-[17.5%] font-fmc flex flex-col justify-start gap-0 -pt-1 pointer-events-none touch-none"
+          class="font-lcd text-[6.5cqi] absolute top-[16.9%] left-[18.9%] w-[43%] h-[17.5%] flex items-center justify-start gap-4 -pt-1 pointer-events-none touch-none"
           :class="{ 'bg-blue-500/10 border border-blue-500': store.debug }"
         >
-          <p
-            v-for="(lineData, lineIndex) in store.lines"
-            :key="lineIndex"
-            class="whitespace-pre"
-            :class="{
-              'leading-[1.2]': lineIndex == 0,
-              'leading-[0.15] lg:leading-[0.25]':
-                isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
-              'leading-[1.15]':
-                !isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
-              'leading-[0.8] lg:leading-none': lineIndex == store.lines.length - 1,
-            }"
-          >
-            <template v-for="(charData, charIndex) in lineData" :key="charIndex">
-              <span
-                v-if="!['□'].includes(charData.char)"
-                :class="`${charData.size} ${charData.color}`"
-              >
-                {{ charData.char }}
-              </span>
-              <span
-                v-else
-                class="inline-block size-[2.7cqi] border-2 border-solid border-current m-0"
-                :class="`${charData.size} ${charData.color}`"
-              ></span>
-            </template>
+          <p class="whitespace-pre">
+            {{ store.navValues.active.mode }}
+          </p>
+          <p class="whitespace-pre">
+            {{ store.navValues.active.value }}
           </p>
         </div>
         <div
-          class="absolute top-[41%] left-[18.9%] w-[43%] h-[17.5%] font-fmc flex flex-col justify-start gap-0 -pt-1 pointer-events-none touch-none"
+          class="font-lcd text-[6.5cqi] absolute top-[41%] left-[18.9%] w-[43%] h-[17.5%] flex items-center justify-start gap-4 -pt-1 pointer-events-none touch-none"
           :class="{ 'bg-blue-500/10 border border-blue-500': store.debug }"
         >
-          <p
-            v-for="(lineData, lineIndex) in store.lines"
-            :key="lineIndex"
-            class="whitespace-pre"
-            :class="{
-              'leading-[1.2]': lineIndex == 0,
-              'leading-[0.15] lg:leading-[0.25]':
-                isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
-              'leading-[1.15]':
-                !isPair(lineIndex + 1) && ![0, store.lines.length - 1].includes(lineIndex),
-              'leading-[0.8] lg:leading-none': lineIndex == store.lines.length - 1,
-            }"
-          >
-            <template v-for="(charData, charIndex) in lineData" :key="charIndex">
-              <span
-                v-if="!['□'].includes(charData.char)"
-                :class="`${charData.size} ${charData.color}`"
-              >
-                {{ charData.char }}
-              </span>
-              <span
-                v-else
-                class="inline-block size-[2.7cqi] border-2 border-solid border-current m-0"
-                :class="`${charData.size} ${charData.color}`"
-              ></span>
-            </template>
+          <p class="whitespace-pre">
+            {{ store.navError ? 'ERR' : store.navValues.standby.mode }}
+          </p>
+          <p class="whitespace-pre">
+            {{
+              store.navValues.standby.value
+                .split('')
+                .map((char, index) => (index < store.navValues.standby.cursor ? char : '_'))
+                .join('')
+            }}
           </p>
         </div>
 

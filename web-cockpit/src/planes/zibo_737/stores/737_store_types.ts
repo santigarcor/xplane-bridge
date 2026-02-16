@@ -42,3 +42,16 @@ export type LineCharData = {
   color: string
   size: string
 }
+
+export type NavFrequency = {
+  value: string
+  mode: string
+  cursor: number
+}
+
+export type NavFrequencies = {
+  active: NavFrequency
+  standby: NavFrequency
+}
+
+export const NavFrequencyModes = ['VOR', 'ILS', 'GLS']

@@ -133,7 +133,7 @@ const NAV_NUM_KEYS: CockpitImageKey[] = [
   'NAV_7',
   'NAV_8',
   'NAV_9',
-  'NAV_',
+  'NAV_EMPTY',
   'NAV_0',
   'NAV_CLR',
 ].map((key, index) => ({
