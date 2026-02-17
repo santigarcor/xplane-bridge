@@ -2,15 +2,15 @@
 @import 'tailwindcss';
 
 @font-face {
-  font-family: 'LCD';
+  font-family: 'DSEG14Classic';
   font-style: normal;
   font-display: swap;
-  src: url("./LCD14.otf");
+  src: url("./DSEG14Classic-Regular.ttf");
 }
 
 @theme {
   --font-fmc: 'VT323', monospace;
-  --font-lcd: 'LCD', monospace;
+  --font-lcd: 'DSEG14Classic', monospace;
   --color-fmc-green: #00ff00;
   --color-fmc-dark: #0a0a0a;
 }

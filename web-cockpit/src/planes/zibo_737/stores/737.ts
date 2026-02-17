@@ -5,6 +5,7 @@ import {
   ColorMap,
   FontSizeMap,
   LineSuffix,
+  NavFrequencyMode,
   NavFrequencyModes,
   type LineCharData,
   type NavFrequencies,
@@ -51,13 +52,13 @@ export const use737Store = defineStore('ZIBO_737', () => {
   const navValues = ref<NavFrequencies>({
     active: {
       value: '',
-      mode: 'VOR',
+      mode: NavFrequencyMode.VOR,
       cursor: 0,
     },
     standby: {
       value: '',
-      mode: 'VOR',
-      cursor: 0,
+      mode: NavFrequencyMode.VOR,
+      cursor: 5,
     },
   })
   const navError = ref(false)
@@ -69,7 +70,7 @@ export const use737Store = defineStore('ZIBO_737', () => {
   ) {
     switch (field) {
       case 'mode':
-        navValues.value[navType][field] = NavFrequencyModes[Number(value)] || 'VOR'
+        navValues.value[navType][field] = NavFrequencyModes[Number(value)] || NavFrequencyMode.VOR
         break
       case 'cursor':
         navValues.value[navType][field] = 5 - Number(value)

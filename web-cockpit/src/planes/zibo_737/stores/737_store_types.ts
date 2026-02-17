@@ -45,7 +45,7 @@ export type LineCharData = {
 
 export type NavFrequency = {
   value: string
-  mode: string
+  mode: NavFrequencyMode
   cursor: number
 }
 
@@ -54,4 +54,10 @@ export type NavFrequencies = {
   standby: NavFrequency
 }
 
-export const NavFrequencyModes = ['VOR', 'ILS', 'GLS']
+export enum NavFrequencyMode {
+  VOR = 'VOR',
+  ILS = 'ILS',
+  GLS = 'GLS',
+}
+
+export const NavFrequencyModes = [NavFrequencyMode.VOR, NavFrequencyMode.ILS, NavFrequencyMode.GLS]

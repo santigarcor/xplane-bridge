@@ -1,14 +1,28 @@
 <script setup lang="ts">
-import { isPair } from '@/helpers'
 import { NAV_MAP } from './types/737_keys'
 import { use737Store } from './stores/737'
-import { NavFrequencyModes } from './stores/737_store_types'
+import { NavFrequencyMode } from './stores/737_store_types'
 
 defineEmits<{
   (e: 'keyPressed', key: string): void
 }>()
 
 const store = use737Store()
+const addDecimalPoint = (value: string, mode: NavFrequencyMode) => {
+  if (mode === NavFrequencyMode.GLS) {
+    return value
+  }
+
+  const values = value.split('')
+  values.splice(3, 0, '.')
+  return values.join('')
+}
+
+const parseStandbyValue = () =>
+  store.navValues.standby.value
+    .split('')
+    .map((char, index) => (index < store.navValues.standby.cursor ? char : '_'))
+    .join('')
 </script>
 
 <template>
@@ -18,30 +32,25 @@ const store = use737Store()
       <div class="absolute inset-0 z-10">
         <!-- 43 18.9 18.9 17.5 -->
         <div
-          class="font-lcd text-[6.5cqi] absolute top-[16.9%] left-[18.9%] w-[43%] h-[17.5%] flex items-center justify-start gap-4 -pt-1 pointer-events-none touch-none"
+          class="font-lcd text-[6cqi] text-white/65 absolute top-[18%] left-[20%] w-[43%] h-[17.5%] flex items-center justify-start gap-2 -pt-1 pointer-events-none touch-none"
           :class="{ 'bg-blue-500/10 border border-blue-500': store.debug }"
         >
           <p class="whitespace-pre">
             {{ store.navValues.active.mode }}
           </p>
           <p class="whitespace-pre">
-            {{ store.navValues.active.value }}
+            {{ addDecimalPoint(store.navValues.active.value, store.navValues.active.mode) }}
           </p>
         </div>
         <div
-          class="font-lcd text-[6.5cqi] absolute top-[41%] left-[18.9%] w-[43%] h-[17.5%] flex items-center justify-start gap-4 -pt-1 pointer-events-none touch-none"
+          class="font-lcd text-[6cqi] text-white/65 absolute top-[42%] left-[20%] w-[43%] h-[17.5%] flex items-center justify-start gap-2 -pt-1 pointer-events-none touch-none"
           :class="{ 'bg-blue-500/10 border border-blue-500': store.debug }"
         >
           <p class="whitespace-pre">
             {{ store.navError ? 'ERR' : store.navValues.standby.mode }}
           </p>
           <p class="whitespace-pre">
-            {{
-              store.navValues.standby.value
-                .split('')
-                .map((char, index) => (index < store.navValues.standby.cursor ? char : '_'))
-                .join('')
-            }}
+            {{ addDecimalPoint(parseStandbyValue(), store.navValues.active.mode) }}
           </p>
         </div>
 

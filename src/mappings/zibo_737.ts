@@ -501,72 +501,81 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   })
   bridge.addMomentarySwitchInputCommand(
     'NAV_1',
-    'laminar/B738/push_button/mmr1_1',
+    ['laminar/B738/push_button/mmr1_1', 'laminar/B738/push_button/mmr2_1'],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_2',
-    'laminar/B738/push_button/mmr1_2',
+    ['laminar/B738/push_button/mmr1_2', 'laminar/B738/push_button/mmr2_2'],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_3',
-    'laminar/B738/push_button/mmr1_3',
+    ['laminar/B738/push_button/mmr1_3', 'laminar/B738/push_button/mmr2_3'],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_4',
-    'laminar/B738/push_button/mmr1_4',
+    ['laminar/B738/push_button/mmr1_4', 'laminar/B738/push_button/mmr2_4'],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_5',
-    'laminar/B738/push_button/mmr1_5',
+    ['laminar/B738/push_button/mmr1_5', 'laminar/B738/push_button/mmr2_5'],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_6',
-    'laminar/B738/push_button/mmr1_6',
+    ['laminar/B738/push_button/mmr1_6', 'laminar/B738/push_button/mmr2_6'],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_7',
-    'laminar/B738/push_button/mmr1_7',
+    ['laminar/B738/push_button/mmr1_7', 'laminar/B738/push_button/mmr2_7'],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_8',
-    'laminar/B738/push_button/mmr1_8',
+    ['laminar/B738/push_button/mmr1_8', 'laminar/B738/push_button/mmr2_8'],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_9',
-    'laminar/B738/push_button/mmr1_9',
+    ['laminar/B738/push_button/mmr1_9', 'laminar/B738/push_button/mmr2_9'],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_0',
-    'laminar/B738/push_button/mmr1_0',
+    ['laminar/B738/push_button/mmr1_0', 'laminar/B738/push_button/mmr2_0'],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_CLR',
-    'laminar/B738/push_button/mmr1_clr',
+    ['laminar/B738/push_button/mmr1_clr', 'laminar/B738/push_button/mmr2_clr'],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_UP',
-    'laminar/B738/push_button/mmr1_mode_up',
+    [
+      'laminar/B738/push_button/mmr1_mode_up',
+      'laminar/B738/push_button/mmr2_mode_up',
+    ],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_DN',
-    'laminar/B738/push_button/mmr1_mode_dn',
+    [
+      'laminar/B738/push_button/mmr1_mode_dn',
+      'laminar/B738/push_button/mmr2_mode_dn',
+    ],
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
     'NAV_ACT_STBY',
-    'laminar/B738/push_button/mmr1_act_stby',
+    [
+      'laminar/B738/push_button/mmr2_act_stby',
+      'laminar/B738/push_button/mmr1_act_stby',
+    ],
     0.1,
   )
 }
