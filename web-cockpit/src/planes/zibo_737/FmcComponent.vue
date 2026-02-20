@@ -23,11 +23,11 @@ const store = use737Store()
         class="whitespace-pre"
         :class="{
           'leading-[1.2]': lineIndex == 0,
-          'leading-[0.15] lg:leading-[0.25]':
+          'leading-[0.24] lg:leading-[0.35]':
             isPair(lineIndex + 1) && ![0, store.fmcLines.length - 1].includes(lineIndex),
           'leading-[1.15]':
             !isPair(lineIndex + 1) && ![0, store.fmcLines.length - 1].includes(lineIndex),
-          'leading-[0.8] lg:leading-none': lineIndex == store.fmcLines.length - 1,
+          'leading-[0.7] lg:leading-[0.7]': lineIndex == store.fmcLines.length - 1,
         }"
       >
         <template v-for="(charData, charIndex) in lineData" :key="charIndex">
