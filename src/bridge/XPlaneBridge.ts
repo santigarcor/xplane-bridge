@@ -348,6 +348,10 @@ export class XPlaneBridge {
 
     if (subscriptionList.length === 0) {
       console.warn('[✈️] ⚠️ No valid datarefs to monitor.')
+      console.log('[✈️] ⚠️ Retrying dataref subscription in 5 seconds...')
+      setTimeout(() => {
+        this.subscribeToAllDataReferences()
+      }, 5000)
       return
     }
 
