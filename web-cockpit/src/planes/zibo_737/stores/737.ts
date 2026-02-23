@@ -52,12 +52,12 @@ export const use737Store = defineStore('ZIBO_737', () => {
   const navValues = ref<NavFrequencies>({
     active: {
       value: '',
-      mode: NavFrequencyMode.VOR,
+      mode: NavFrequencyMode.EMPTY,
       cursor: 0,
     },
     standby: {
       value: '',
-      mode: NavFrequencyMode.VOR,
+      mode: NavFrequencyMode.EMPTY,
       cursor: 5,
     },
   })

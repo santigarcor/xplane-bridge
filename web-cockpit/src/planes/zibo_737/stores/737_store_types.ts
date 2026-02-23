@@ -58,6 +58,7 @@ export enum NavFrequencyMode {
   VOR = 'VOR',
   ILS = 'ILS',
   GLS = 'GLS',
+  EMPTY = '',
 }
 
 export const NavFrequencyModes = [NavFrequencyMode.VOR, NavFrequencyMode.ILS, NavFrequencyMode.GLS]
