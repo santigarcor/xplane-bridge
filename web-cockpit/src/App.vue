@@ -54,7 +54,7 @@ onMounted(() => {
     >
       <!-- Sidebar Header -->
       <div
-        class="flex h-12 w-full flex-none items-center justify-between px-4 lg:justify-center dark:bg-gray-600/25"
+        class="flex h-9 w-full flex-none items-center justify-between px-4 lg:justify-center dark:bg-gray-600/25"
       >
         <!-- Brand -->
         <a
@@ -70,10 +70,10 @@ onMounted(() => {
           <button
             @click="mobileSidebarOpen = false"
             type="button"
-            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
+            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
           >
             <svg
-              class="hi-mini hi-x-mark -mx-0.5 inline-block size-5"
+              class="hi-mini hi-x-mark -mx-0.5 inline-block size-4"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
               fill="currentColor"
@@ -128,7 +128,7 @@ onMounted(() => {
     <!-- Page Header -->
     <header
       id="page-header"
-      class="fixed top-0 right-0 left-0 z-30 flex h-12 flex-none items-center bg-white shadow-xs dark:bg-gray-800"
+      class="fixed top-0 right-0 left-0 z-30 flex h-9 flex-none items-center bg-white shadow-xs dark:bg-gray-800"
       :class="{
         'lg:pl-64': desktopSidebarOpen,
       }"
@@ -141,10 +141,10 @@ onMounted(() => {
             <button
               @click="desktopSidebarOpen = !desktopSidebarOpen"
               type="button"
-              class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
+              class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
             >
               <svg
-                class="hi-solid hi-menu-alt-1 inline-block size-5"
+                class="hi-solid hi-menu-alt-1 inline-block size-4"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -165,10 +165,10 @@ onMounted(() => {
             <button
               @click="mobileSidebarOpen = !mobileSidebarOpen"
               type="button"
-              class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
+              class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
             >
               <svg
-                class="hi-solid hi-menu-alt-1 inline-block size-5"
+                class="hi-solid hi-menu-alt-1 inline-block size-4"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -241,7 +241,7 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <!-- Debug -->
           <button
-            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
+            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
             :class="{ 'bg-emerald-100/20!': webCockpitStore.debug }"
             @click="webCockpitStore.toggleDebugMode()"
           >
@@ -254,7 +254,7 @@ onMounted(() => {
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
-              class="lucide lucide-bug inline-block size-5"
+              class="lucide lucide-bug inline-block size-4"
             >
               <path d="m8 2 1.88 1.88" />
               <path d="M14.12 3.88 16 2" />
@@ -274,14 +274,14 @@ onMounted(() => {
           <!-- END Debug -->
           <!-- Refresh -->
           <button
-            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
+            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm leading-5 font-semibold text-gray-800 hover:border-gray-300 hover:text-gray-900 hover:shadow-xs focus:ring-3 focus:ring-gray-300/25 active:border-gray-200 active:shadow-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-200 dark:focus:ring-gray-600/40 dark:active:border-gray-700"
             @click="webCockpitStore.reInitializeWebSocket()"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 16 16"
               fill="currentColor"
-              class="hi-micro hi-arrow-path inline-block size-5"
+              class="hi-micro hi-arrow-path inline-block size-4"
             >
               <path
                 fill-rule="evenodd"
@@ -298,9 +298,9 @@ onMounted(() => {
     <!-- END Page Header -->
 
     <!-- Page Content -->
-    <main id="page-content" class="flex max-w-full flex-auto flex-col pt-12">
+    <main id="page-content" class="flex max-w-full flex-auto flex-col pt-10">
       <!-- Page Section -->
-      <div class="mx-auto w-full max-w-10xl p-4">
+      <div class="mx-auto w-full max-w-10xl px-4 pt-2">
         <RouterView />
       </div>
       <!-- END Page Section -->
