@@ -3,6 +3,8 @@ export enum ParserType {
   ROUND = 'round',
   TO_DEGREES = 'to_degrees',
   VALUE_MAP = 'value_map',
+  NONE = 'none',
+  BASE64DECODE = 'base64decode',
 }
 export type ParserFunction = (v: any, extra?: any) => any
 
@@ -40,6 +42,7 @@ export type XPlaneIdentifierType = 'datarefs' | 'commands'
 export type XplaneWebsocketMessage = {
   type: XPlaneMessageType
   request_id?: number | undefined
+  req_id?: number | undefined
   data?: Record<string, any> | undefined
   success?: boolean | undefined
   error_code?: string | undefined
@@ -51,7 +54,8 @@ export type XplaneWebsocketMessage = {
  * including threshold and parser type for value conversion.
  */
 export type DataRefMapping = {
-  arduino_cmd: string
+  arduino_cmd?: string | undefined
+  web_cockpit_cmd?: string | undefined
   threshold: number
   parser: ParserType | undefined
   value_map?: ValueMap | undefined
@@ -74,4 +78,10 @@ export type InputMapping = {
 
 export type InputMappings = {
   [key: string]: InputMapping
+}
+
+export type PreviousValue = {
+  parsedValue: any
+  rawValue: any
+  dataRefName: keyof DataRefMappings
 }
