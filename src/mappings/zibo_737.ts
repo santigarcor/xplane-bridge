@@ -578,4 +578,65 @@ export function initializeMappings(bridge: XPlaneBridge): void {
     ],
     0.1,
   )
+
+  bridge.addDataRef('sim/cockpit/radios/transponder_code', {
+    web_cockpit_cmd: 'xpdr_code',
+    threshold: 0,
+    parser: ParserType.NONE,
+  })
+  bridge.addDataRef('laminar/B738/knob/transponder_pos', {
+    web_cockpit_cmd: 'xpdr_mode',
+    threshold: 0,
+    parser: ParserType.ROUND,
+  })
+  bridge.addMomentarySwitchInputCommand(
+    'XPDR_MODE_DN',
+    'laminar/B738/knob/transponder_mode_dn',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'XPDR_MODE_UP',
+    'laminar/B738/knob/transponder_mode_up',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'XPDR_1000_DN',
+    'laminar/B738/knob/xpndr_1000_dn',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'XPDR_1000_UP',
+    'laminar/B738/knob/xpndr_1000_up',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'XPDR_100_DN',
+    'laminar/B738/knob/xpndr_100_dn',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'XPDR_100_UP',
+    'laminar/B738/knob/xpndr_100_up',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'XPDR_10_DN',
+    'laminar/B738/knob/xpndr_10_dn',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'XPDR_10_UP',
+    'laminar/B738/knob/xpndr_10_up',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'XPDR_1_DN',
+    'laminar/B738/knob/xpndr_1_dn',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'XPDR_1_UP',
+    'laminar/B738/knob/xpndr_1_up',
+    0.1,
+  )
 }

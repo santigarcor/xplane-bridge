@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { NAV_MAP } from './types/737_keys'
+import { NAV_MAP, TRANSPONDER_MAP } from './types/737_keys'
 import { use737Store } from './stores/737'
 import { NavFrequencyMode } from './stores/737_store_types'
+import CockpitImageKey from '@/components/CockpitImageKey.vue'
 
 defineEmits<{
   (e: 'keyPressed', key: string): void
@@ -26,8 +27,9 @@ const parseStandbyValue = () =>
 </script>
 
 <template>
-  <div class="flex gap-4">
-    <div class="image-container relative w-full lg:max-w-125 aspect-2995/1351 shadow-2xl bg-black">
+  <div class="flex flex-wrap gap-2">
+    <!-- NAV START -->
+    <div class="image-container relative w-full lg:max-w-125 aspect-2995/1351 shadow-2xl bg-white">
       <img src="./assets/737nav.png" class="absolute inset-0 w-full h-full object-fill" />
       <div class="absolute inset-0 z-10">
         <!-- 43 18.9 18.9 17.5 -->
@@ -54,39 +56,41 @@ const parseStandbyValue = () =>
           </p>
         </div>
 
-        <button
-          v-for="key in NAV_MAP"
-          :key="key.id"
-          @touchstart.prevent="$emit('keyPressed', key.id)"
-          class="absolute transition-all active:bg-white/20 active:brightness-50 cursor-pointer"
-          :class="store.debug ? 'border border-red-500 bg-red-500/10' : 'bg-transparent'"
-          :style="{
-            top: key.top + '%',
-            left: key.left + '%',
-            width: key.width + '%',
-            height: key.height + '%',
-          }"
-        >
-          <span v-if="store.debug" class="text-[2cqi] text-red-500 absolute -top-4 left-0">
-            {{ key.id }}
-          </span>
-        </button>
-        <div
-          v-if="store.fmcLights['exec']"
-          class="bg-yellow-400/58 rounded-xl absolute top-[54.2%] left-[80.6%] w-[8%] h-[1.5%] touch-none"
-          :class="{ 'bg-yellow-500/10 border border-yellow-500': store.debug }"
-        ></div>
-        <div
-          v-if="store.fmcLights['msg']"
-          class="flex flex-col text-[3cqi] font-bold leading-none text-yellow-400/58 absolute top-[71.2%] left-[93.3%] touch-none gap-0 items-center justify-center"
-          :class="{ 'bg-yellow-500/10 border border-yellow-500': store.debug }"
-        >
-          <span>M</span>
-          <span>S</span>
-          <span>G</span>
-        </div>
+        <CockpitImageKey
+          v-for="cockpitImageKey in NAV_MAP"
+          :key="cockpitImageKey.id"
+          :data="cockpitImageKey"
+        />
       </div>
     </div>
+    <!-- NAV END -->
+    <!-- TRANSPONDER START -->
+    <div
+      class="image-container relative w-full lg:max-w-125 xl:max-w-148 aspect-2995/1146 shadow-2xl bg-white"
+    >
+      <img src="./assets/737transponder.png" class="absolute inset-0 w-full h-auto object-fill" />
+      <div class="absolute inset-0 z-10">
+        <div
+          class="text-white/65 absolute top-[9%] left-[40%] w-[20%] h-[33%] flex flex-col items-start justify-start gap-3 -pt-1 pointer-events-none touch-none leading-none"
+          :class="{ 'bg-blue-500/10 border border-blue-500': store.debug }"
+        >
+          <p class="text-[3.5cqi]">ATC 1</p>
+          <p class="font-lcd text-[6cqi]">{{ store.transpoderCode }}</p>
+        </div>
+        <img
+          src="./assets/737transponder-arrow.png"
+          class="absolute top-[13%] left-[14.2%] w-[7.5%] h-auto"
+          :style="`transform: rotate(${store.transpoderMode * 37}deg)`"
+        />
+
+        <CockpitImageKey
+          v-for="cockpitImageKey in TRANSPONDER_MAP"
+          :key="cockpitImageKey.id"
+          :data="cockpitImageKey"
+        />
+      </div>
+    </div>
+    <!-- TRANSPONDER END -->
   </div>
 </template>
 

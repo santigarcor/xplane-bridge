@@ -83,6 +83,9 @@ export const use737Store = defineStore('ZIBO_737', () => {
     }
   }
 
+  const transpoderMode = ref<number>(0)
+  const transpoderCode = ref<string>('')
+
   function handleBridgeCommand(command: string, value: string | number | number[]): void {
     if (command.startsWith('fmc_line-')) {
       const lineKey = command.split('-').pop() as string
@@ -106,6 +109,14 @@ export const use737Store = defineStore('ZIBO_737', () => {
       const [_, navType, navField] = command.split('_')
       setNavValues(navType as keyof NavFrequencies, navField as keyof NavFrequency, value)
     }
+
+    if (command === 'xpdr_mode') {
+      transpoderMode.value = Number(value)
+    }
+
+    if (command === 'xpdr_code') {
+      transpoderCode.value = value.toString().padStart(4, '0')
+    }
   }
 
   return {
@@ -115,5 +126,7 @@ export const use737Store = defineStore('ZIBO_737', () => {
     handleBridgeCommand,
     fmcLights: computed(() => fmcLights.value),
     navError: computed(() => navError.value),
+    transpoderCode,
+    transpoderMode,
   }
 })

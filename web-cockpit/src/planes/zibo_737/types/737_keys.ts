@@ -143,6 +143,7 @@ const NAV_NUM_KEYS: CockpitImageKey[] = [
   width: 8.1,
   height: 17.2,
 }))
+
 export const NAV_MAP: CockpitImageKey[] = [
   ...NAV_NUM_KEYS,
   {
@@ -168,17 +169,75 @@ export const NAV_MAP: CockpitImageKey[] = [
   },
 ]
 
-// laminar/B738/push_button/mmr1_1
-// laminar/B738/push_button/mmr1_2
-// laminar/B738/push_button/mmr1_clr
-// laminar/B738/push_button/mmr1_mode_up
-// laminar/B738/push_button/mmr1_mode_dn
-// laminar/B738/push_button/mmr1_act_stby
-
-// laminar/B738/mmr/cpt/stby_cursor => 0 - 5 show the cursor position on the display if 4 it shows 1__.__
-// laminar/B738/mmr/cpt/stby_mode => 0 -> VOR, 1 -> ILS, 2 -> GLS
-// laminar/B738/mmr/cpt/stby_value array of values inverse
-// laminar/B738/mmr/cpt/err shows ERR on the stdnby
-
-// laminar/B738/mmr/cpt/act_value
-// laminar/B738/mmr/cpt/act_mode
+export const TRANSPONDER_MAP: CockpitImageKey[] = [
+  {
+    id: 'XPDR_MODE_DN',
+    top: 45.5,
+    left: 15.2,
+    width: 5,
+    height: 14.5,
+  },
+  {
+    id: 'XPDR_MODE_UP',
+    top: 45.5,
+    left: 21.6,
+    width: 5,
+    height: 14.5,
+  },
+  {
+    id: 'XPDR_1000_DN',
+    top: 53,
+    left: 30.4,
+    width: 5,
+    height: 14.5,
+  },
+  {
+    id: 'XPDR_1000_UP',
+    top: 53,
+    left: 36.8,
+    width: 5,
+    height: 14.5,
+  },
+  {
+    id: 'XPDR_100_DN',
+    top: 77.5,
+    left: 30.4,
+    width: 5,
+    height: 14.5,
+  },
+  {
+    id: 'XPDR_100_UP',
+    top: 77.5,
+    left: 36.8,
+    width: 5,
+    height: 14.5,
+  },
+  {
+    id: 'XPDR_10_DN',
+    top: 53,
+    left: 58.1,
+    width: 5,
+    height: 14.5,
+  },
+  {
+    id: 'XPDR_10_UP',
+    top: 53,
+    left: 64.5,
+    width: 5,
+    height: 14.5,
+  },
+  {
+    id: 'XPDR_1_DN',
+    top: 77.5,
+    left: 58.1,
+    width: 5,
+    height: 14.5,
+  },
+  {
+    id: 'XPDR_1_UP',
+    top: 77.5,
+    left: 64.5,
+    width: 5,
+    height: 14.5,
+  },
+]
