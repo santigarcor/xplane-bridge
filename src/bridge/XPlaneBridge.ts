@@ -349,8 +349,8 @@ export class XPlaneBridge {
       }
     }
 
-    if (subscriptionList.length === 0) {
-      console.warn('[✈️] ⚠️ No valid datarefs to monitor.')
+    if (subscriptionList.length !== Object.keys(this.dataRefMappings).length) {
+      console.warn('[✈️] ⚠️ Not all datarefs are available.')
       console.log('[✈️] ⚠️ Retrying dataref subscription in 5 seconds...')
       setTimeout(() => {
         this.subscribeToAllDataReferences()
