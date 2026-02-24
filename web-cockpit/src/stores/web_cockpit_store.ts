@@ -101,6 +101,12 @@ export const useWebCockpitStore = defineStore('web_cockpit', () => {
     }
   }
 
+  function pressKey(key: string) {
+    if (navigator.vibrate) navigator.vibrate(15)
+    console.log('Key pressed in FMC View:', key)
+    sendCommand(key)
+  }
+
   return {
     initializeWebSocket,
     reInitializeWebSocket,
@@ -108,6 +114,7 @@ export const useWebCockpitStore = defineStore('web_cockpit', () => {
     activePlane: computed(() => activePlane.value),
     debug: computed(() => activePlaneStore.value?.debug ?? false),
     setActivePlane,
+    pressKey,
     activePlaneStore,
     wsStatus,
     toggleDebugMode,

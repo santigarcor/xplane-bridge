@@ -12,20 +12,10 @@ const dynamicComponent = computed(() => {
   }
   return defineAsyncComponent(() => import(`@/planes/${activePlane.value}/NavComponent.vue`))
 })
-
-function handleKeyPressed(key: string) {
-  if (navigator.vibrate) navigator.vibrate(15)
-  console.log('Key pressed in NAV View:', key)
-  webCockpitStore.sendCommand(key)
-}
 </script>
 
 <template>
-  <component
-    v-if="dynamicComponent !== null"
-    :is="dynamicComponent"
-    @key-pressed="handleKeyPressed"
-  />
+  <component v-if="dynamicComponent !== null" :is="dynamicComponent" />
 </template>
 
 <style scoped></style>

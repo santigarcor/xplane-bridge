@@ -2,10 +2,7 @@
 import { isPair } from '@/helpers'
 import { FMC_MAP } from './types/737_keys'
 import { use737Store } from './stores/737'
-
-defineEmits<{
-  (e: 'keyPressed', key: string): void
-}>()
+import CockpitImageKey from '@/components/CockpitImageKey.vue'
 
 const store = use737Store()
 </script>
@@ -43,23 +40,12 @@ const store = use737Store()
       </p>
     </div>
 
-    <button
-      v-for="key in FMC_MAP"
-      :key="key.id"
-      @touchstart.prevent="$emit('keyPressed', key.id)"
-      class="absolute transition-all active:bg-white/20 active:brightness-50 cursor-pointer"
-      :class="store.debug ? 'border border-red-500 bg-red-500/10' : 'bg-transparent'"
-      :style="{
-        top: key.top + '%',
-        left: key.left + '%',
-        width: key.width + '%',
-        height: key.height + '%',
-      }"
-    >
-      <span v-if="store.debug" class="text-[2cqi] text-red-500 absolute -top-4 left-0">
-        {{ key.id }}
-      </span>
-    </button>
+    <CockpitImageKey
+      v-for="cockpitImageKey in FMC_MAP"
+      :key="cockpitImageKey.id"
+      :data="cockpitImageKey"
+    />
+
     <div
       v-if="store.fmcLights['exec']"
       class="bg-yellow-400/58 rounded-xl absolute top-[54.2%] left-[80.6%] w-[8%] h-[1.5%] touch-none"
