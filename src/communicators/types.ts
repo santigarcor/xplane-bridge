@@ -22,7 +22,12 @@ export interface Communicator {
   /**
    * Receives the callback that will be executed when Arduino/WebCockpit sends a user interaction
    */
-  onMessage(onMessageReceived: (data: IncomingMessage) => void): void
+  onMessage(onMessageReceived: (data: IncomingMessage) => void): this
+
+  /**
+   * Receives the callback that will be executed when a new connection is established with Arduino/WebCockpit
+   */
+  onConnection(onNewConnection: (connection: Communicator) => void): this
 
   /**
    * Sends data from the Bridge to Arduino/WebCockpit when an update occurs in the flight simulator

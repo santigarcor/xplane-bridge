@@ -3,12 +3,14 @@ import 'dotenv/config'
 import {
   ArduinoSerialCommunicator,
   WebCockpitServiceCommunicator,
+  type Communicator,
   type IncomingMessage,
 } from '../communicators/index.js'
 import type {
   DataRefMapping,
   DataRefMappings,
   InputMappings,
+  PreviousValue,
   ValueMap,
   XPlaneIdentifierType,
   XplaneWebsocketMessage,
@@ -50,7 +52,7 @@ export class XPlaneBridge {
     commands: new Map<string, any>(),
   }
 
-  private previousValues: Record<string, any> = {}
+  private previousValues: Record<string, PreviousValue> = {}
 
   constructor(__dirname: string, activePlane: SupportedAircraft) {
     this.websocketsUrl = `ws://${process.env.XPLANE_HOST}:${process.env.XPLANE_PORT}/api/v2`
@@ -58,7 +60,6 @@ export class XPlaneBridge {
 
     this.arduino = new ArduinoSerialCommunicator(
       parseInt(process.env.ARDUINO_BAUD || '9600'),
-      false,
     )
     this.webCockpit = new WebCockpitServiceCommunicator(
       parseInt(process.env.WEBFMC_PORT || '8080'),
@@ -301,14 +302,16 @@ export class XPlaneBridge {
   }
 
   public async run() {
-    this.arduino.onMessage(this.handleArduinoMessage.bind(this))
-    this.webCockpit.onMessage(this.handleArduinoMessage.bind(this))
-
-    await this.arduino.connect()
-    await this.webCockpit.connect()
-
-    await new Promise((resolve) => setTimeout(resolve, 2000))
     this.initializeWebSocket()
+
+    this.arduino
+      .onMessage(this.handleArduinoMessage.bind(this))
+      .onConnection(this.updateNewConnection.bind(this))
+      .connect()
+    this.webCockpit
+      .onMessage(this.handleArduinoMessage.bind(this))
+      .onConnection(this.updateNewConnection.bind(this))
+      .connect()
   }
 
   private initializeWebSocket() {
@@ -389,13 +392,33 @@ export class XPlaneBridge {
       return true
     }
 
-    const oldValue = this.previousValues[arduinoCmd]
+    const oldValue = this.previousValues[arduinoCmd].parsedValue
 
     if (typeof newValue === 'number' && typeof oldValue === 'number') {
       return Math.abs(newValue - oldValue) >= threshold
     }
 
     return newValue !== oldValue
+  }
+
+  private updateNewConnection(connection: Communicator) {
+    for (const command in this.previousValues) {
+      if (!this.previousValues[command]) continue
+      const { parsedValue: value, dataRefName } = this.previousValues[command]
+      const mapping = this.dataRefMappings[dataRefName]
+
+      if (
+        (connection instanceof ArduinoSerialCommunicator &&
+          mapping!.arduino_cmd === command) ||
+        (connection instanceof WebCockpitServiceCommunicator &&
+          mapping!.web_cockpit_cmd === command)
+      ) {
+        connection.sendMessage({
+          cmd: command,
+          value,
+        })
+      }
+    }
   }
 
   private handleXPlaneUpdate(rawData: RawData) {
@@ -467,7 +490,11 @@ export class XPlaneBridge {
               this.webCockpit.sendMessage({ cmd: command, value: parsedValue })
             }
 
-            this.previousValues[command] = parsedValue
+            this.previousValues[command] = {
+              parsedValue,
+              rawValue: updatedValue,
+              dataRefName,
+            }
           }
           break
       }

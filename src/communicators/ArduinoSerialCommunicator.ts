@@ -10,14 +10,21 @@ export class ArduinoSerialCommunicator implements Communicator {
    * Callback that will be executed when Arduino/WebCockpit sends a user interaction
    */
   private onMessageReceived: (data: IncomingMessage) => void = () => {}
+  private onConnectionStablished: (connection: Communicator) => void = () => {}
 
   constructor(
     private baudRate: number = 57600,
     private reconnect: boolean = true,
   ) {}
 
-  onMessage(onMessageReceived: (data: IncomingMessage) => void): void {
+  onMessage(onMessageReceived: (data: IncomingMessage) => void): this {
     this.onMessageReceived = onMessageReceived
+    return this
+  }
+
+  onConnection(onNewConnection: (connection: Communicator) => void): this {
+    this.onConnectionStablished = onNewConnection
+    return this
   }
 
   async autodiscoverPort(): Promise<string | null> {
@@ -61,6 +68,7 @@ export class ArduinoSerialCommunicator implements Communicator {
       setTimeout(() => {
         console.log(`[📟] ✅ Connected to Arduino on port "${portPath}"`)
         this.isAttemptingConnection = false
+        this.onConnectionStablished(this)
       }, 2000)
     })
 

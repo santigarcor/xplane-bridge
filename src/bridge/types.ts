@@ -79,3 +79,9 @@ export type InputMapping = {
 export type InputMappings = {
   [key: string]: InputMapping
 }
+
+export type PreviousValue = {
+  parsedValue: any
+  rawValue: any
+  dataRefName: keyof DataRefMappings
+}

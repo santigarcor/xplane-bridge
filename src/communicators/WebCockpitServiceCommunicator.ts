@@ -10,6 +10,7 @@ export class WebCockpitServiceCommunicator implements Communicator {
   private server: HttpServer
   private wss: WebSocketServer
   private onMessageReceived: (data: IncomingMessage) => void = () => {}
+  private onConnectionStablished: (connection: Communicator) => void = () => {}
 
   constructor(
     private port: number = 8080,
@@ -20,8 +21,14 @@ export class WebCockpitServiceCommunicator implements Communicator {
     this.wss = new WebSocketServer({ server: this.server })
   }
 
-  public onMessage(onMessageReceived: (data: IncomingMessage) => void) {
+  public onMessage(onMessageReceived: (data: IncomingMessage) => void): this {
     this.onMessageReceived = onMessageReceived
+    return this
+  }
+
+  onConnection(onNewConnection: (connection: Communicator) => void): this {
+    this.onConnectionStablished = onNewConnection
+    return this
   }
 
   async connect(): Promise<void> {
@@ -48,6 +55,8 @@ export class WebCockpitServiceCommunicator implements Communicator {
           value: this.activePlane,
         } as OutgoingMessage),
       )
+
+      this.onConnectionStablished(this)
 
       ws.on('message', (rawData: RawData) => {
         try {
