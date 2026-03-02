@@ -153,7 +153,7 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   )
   bridge.addMomentarySwitchInputCommand(
     'altitude_hold',
-    'laminar/B738/autopilot/alt_hld_press',
+    'laminar/B738/autopilot/lvl_chg_press',
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
@@ -180,12 +180,13 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   /**
    * LEDS
    */
+  bridge.addBooleanDataRef('laminar/B738/autopilot/speed_status1', 'speed_led')
   bridge.addBooleanDataRef(
     'laminar/B738/autopilot/hdg_sel_status',
     'heading_led',
   )
   bridge.addBooleanDataRef(
-    'laminar/B738/autopilot/alt_hld_status',
+    'laminar/B738/autopilot/lvl_chg_status',
     'altitude_led',
   )
   bridge.addBooleanDataRef(
