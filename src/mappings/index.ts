@@ -1,6 +1,7 @@
 import { initializeMappings as initFF757 } from './ff_757.js'
 import type { MappingsInitializer, SupportedAircraft } from './types.js'
 import { initializeMappings as initZibo737 } from './zibo_737.js'
+export { detectPlane } from './detector.js'
 
 const initializer: MappingsInitializer = {
   zibo_737: initZibo737,

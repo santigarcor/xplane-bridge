@@ -17,7 +17,11 @@ import type {
 } from './types.js'
 import { ParserType, TOGGLE_DATAREF, XPlaneMessageType } from './types.js'
 import { ensureArray } from './helpers.js'
-import type { SupportedAircraft } from '../mappings/types.js'
+import {
+  detectPlane,
+  type MappingsInitializer,
+  type SupportedAircraft,
+} from '../mappings/index.js'
 
 const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
   [ParserType.BOOLEAN]: (v) => (v > 0 ? 1 : 0),
@@ -53,8 +57,13 @@ export class XPlaneBridge {
   }
 
   private previousValues: Record<string, PreviousValue> = {}
+  private currentPlane: SupportedAircraft | null = null
+  private liveryPathDataRefId: number | null = null
 
-  constructor(__dirname: string, activePlane: SupportedAircraft) {
+  constructor(
+    __dirname: string,
+    private planeInitializer: MappingsInitializer,
+  ) {
     this.websocketsUrl = `ws://${process.env.XPLANE_HOST}:${process.env.XPLANE_PORT}/api/v2`
     this.restUrl = `http://${process.env.XPLANE_HOST}:${process.env.XPLANE_PORT}/api/v2`
 
@@ -64,7 +73,7 @@ export class XPlaneBridge {
     this.webCockpit = new WebCockpitServiceCommunicator(
       parseInt(process.env.WEBFMC_PORT || '8080'),
       __dirname,
-      activePlane,
+      null,
     )
   }
 
@@ -301,6 +310,63 @@ export class XPlaneBridge {
     this.webCockpit.disconnect()
   }
 
+  private clearMappings(): void {
+    this.dataRefMappings = {}
+    this.inputMappings = {}
+    this.previousValues = {}
+    this.idCache.datarefs = new Map()
+  }
+
+  private async subscribeToLiveryPath(): Promise<void> {
+    const liveryPathDataRef = 'sim/aircraft/view/acf_livery_path'
+    const dataRefId = await this.getXPlaneIdentifierId(
+      'datarefs',
+      liveryPathDataRef,
+    )
+    if (dataRefId === null) {
+      console.warn(
+        '[✈️] ⚠️ Could not find livery path dataref. Retrying in 5 seconds...',
+      )
+      setTimeout(() => this.subscribeToLiveryPath(), 5000)
+      return
+    }
+    this.liveryPathDataRefId = dataRefId
+    this.sendWebSocketMessage('dataref_subscribe_values', {
+      datarefs: [{ id: dataRefId }],
+    })
+    console.log('[✈️] ✅ Subscribed to livery path dataref')
+  }
+
+  private async handleLiveryPathUpdate(base64Value: string): Promise<void> {
+    const liveryPath = Buffer.from(base64Value, 'base64').toString('utf-8')
+    const plane = detectPlane(liveryPath)
+
+    if (plane === null) {
+      console.warn(`[✈️] ⚠️ Unrecognized aircraft livery path: ${liveryPath}`)
+      return
+    }
+
+    if (plane === this.currentPlane) {
+      return
+    }
+
+    console.log(`[✈️] ✅ Detected aircraft: ${plane} (livery: ${liveryPath})`)
+
+    if (this.currentPlane !== null) {
+      this.sendWebSocketMessage('dataref_unsubscribe_values', {
+        datarefs: 'all',
+      })
+    }
+
+    this.clearMappings()
+    this.currentPlane = plane
+    this.planeInitializer[plane](this)
+    this.webCockpit.updateActivePlane(plane)
+
+    await this.subscribeToLiveryPath()
+    await this.subscribeToAllDataReferences()
+  }
+
   public async run() {
     this.initializeWebSocket()
 
@@ -319,7 +385,8 @@ export class XPlaneBridge {
 
     this.webSocket.on('open', async () => {
       console.log('[✈️] ✅ WebSocket connection with X-Plane established')
-      await this.subscribeToAllDataReferences()
+      await this.subscribeToLiveryPath()
+      console.log('[✈️] 👀 Waiting for plane detection...')
       console.log('Press Ctrl+C to exit')
       console.log('---------------------------------------------')
     })
@@ -421,7 +488,7 @@ export class XPlaneBridge {
     }
   }
 
-  private handleXPlaneUpdate(rawData: RawData) {
+  private async handleXPlaneUpdate(rawData: RawData) {
     try {
       const message: XplaneWebsocketMessage = JSON.parse(rawData.toString())
 
@@ -442,12 +509,21 @@ export class XPlaneBridge {
 
           for (const dataRefId in updates) {
             const updatedValue = updates[dataRefId]
+
+            if (
+              this.liveryPathDataRefId !== null &&
+              parseInt(dataRefId) === this.liveryPathDataRefId
+            ) {
+              await this.handleLiveryPathUpdate(updatedValue)
+              continue
+            }
+
             let dataRefName: string | null = this.findDataRefNameById(
               parseInt(dataRefId),
             )
 
             if (!dataRefName || !this.dataRefMappings[dataRefName]) {
-              return
+              continue
             }
 
             const mapping = this.dataRefMappings[dataRefName]
