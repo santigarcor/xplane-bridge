@@ -147,9 +147,9 @@ SwitchData switches[SWITCHES_COUNT] = {
  * Displays
  */
 const int DISPLAYS_COUNT = 5;
-const int DISPLAY_PIN_DIN = 51;
-const int DISPLAY_PIN_CS = 52;
-const int DISPLAY_PIN_CLK = 53;
+const int DISPLAY_PIN_DIN = 48;
+const int DISPLAY_PIN_CS = 50;
+const int DISPLAY_PIN_CLK = 52;
 const int DISPLAY_COMMANDS_COUNT = 6;
 
 struct DisplayCommand {
@@ -446,7 +446,7 @@ void initDisplays() {
   // Initialize 8 digits Displays
   for (int display = 0; display < ledControl.getDeviceCount(); display++) {
     ledControl.shutdown(display, false);
-    ledControl.setIntensity(display, 2);
+    ledControl.setIntensity(display, 1);
     ledControl.clearDisplay(display);
     // ledControl.setScanLimit(display, 8);
   }
