@@ -4,12 +4,17 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   /**
    * DISPLAYS
    */
+  bridge.addDataRef('sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot', {
+    arduino_cmd: 'set_course_1',
+    threshold: 1,
+    parser: ParserType.ROUND,
+  })
   bridge.addDataRef('1-sim/AP/spdSetting', {
     arduino_cmd: 'set_speed',
     threshold: 1,
     parser: ParserType.ROUND,
   })
-  bridge.addDataRef('1-sim/AP/dig3/hdgSetting', {
+  bridge.addDataRef('1-sim/AP/hdgSetting', {
     arduino_cmd: 'set_heading',
     threshold: 1,
     parser: ParserType.ROUND,
@@ -24,6 +29,11 @@ export function initializeMappings(bridge: XPlaneBridge): void {
     threshold: 50,
     parser: ParserType.ROUND,
   })
+  bridge.addDataRef('1-sim/radios/nav3_obs_deg_mag_pilot', {
+    arduino_cmd: 'set_course_2',
+    threshold: 50,
+    parser: ParserType.ROUND,
+  })
   bridge.addDataRef('sim/cockpit2/autopilot/vvi_status', {
     arduino_cmd: 'toggle_display_set_vertical_speed',
     threshold: 1,
@@ -33,6 +43,11 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   /**
    * ENCODERS
    */
+  bridge.addRotaryEncoderCommands(
+    'course_1_encoder',
+    '1-sim/comm/vor1crsRotaryUP',
+    '1-sim/comm/vor1crsRotaryDN',
+  )
   bridge.addRotaryEncoderCommands(
     'speed_encoder',
     '1-sim/comm/AP/spdUP',
@@ -53,40 +68,52 @@ export function initializeMappings(bridge: XPlaneBridge): void {
     '1-sim/comm/AP/vviUP',
     '1-sim/comm/AP/vviDN',
   )
+  bridge.addRotaryEncoderCommands(
+    'course_2_encoder',
+    '1-sim/comm/vor2crsRotaryUP',
+    '1-sim/comm/vor2crsRotaryDN',
+  )
 
   /**
    * SWITCHES
    */
-  bridge.addToggleSwitchInputDataRef(
+  bridge.addToggleSwitchInputCommands(
     'at_arm',
-    ['1-sim/AP/atSwitcher', '1-sim/AP/atSwitcher/anim'],
-    true,
+    '1-sim/command/AP/atSwitcher_trigger',
   )
-  bridge.addToggleSwitchInputDataRef(
-    'flight_director',
-    ['1-sim/AP/fd1Switcher', '1-sim/AP/fd1Switcher/anim'],
-    true,
+  bridge.addToggleSwitchInputCommands(
+    'flight_director_1',
+    '1-sim/command/AP/fd1Switcher_trigger',
   )
-  bridge.addToggleSwitchInputDataRef('landing_l', [
-    '1-sim/lights/landingL/switch',
-    '1-sim/lights/landingL/switch/anim',
-  ])
-  bridge.addToggleSwitchInputDataRef('landing_r', [
-    '1-sim/lights/landingR/switch',
-    '1-sim/lights/landingR/switch/anim',
-  ])
-  bridge.addToggleSwitchInputDataRef('runway_l', [
-    '1-sim/lights/runwayL/switch',
-    '1-sim/lights/runwayL/switch/anim',
-  ])
-  bridge.addToggleSwitchInputDataRef('runway_r', [
-    '1-sim/lights/runwayR/switch',
-    '1-sim/lights/runwayR/switch/anim',
-  ])
-  bridge.addToggleSwitchInputDataRef('taxi', [
-    '1-sim/lights/landingN/switch',
-    '1-sim/lights/landingN/switch/anim',
-  ])
+  bridge.addToggleSwitchInputCommands(
+    'disengage',
+    '1-sim/command/AP/desengageLever_button',
+  )
+  bridge.addToggleSwitchInputCommands(
+    'flight_director_2',
+    '1-sim/command/AP/fd2Switcher_trigger',
+  )
+
+  bridge.addToggleSwitchInputCommands(
+    'landing_l',
+    '1-sim/command/lights/landingL/switch_trigger',
+  )
+  bridge.addToggleSwitchInputCommands(
+    'landing_r',
+    '1-sim/command/lights/landingR/switch_trigger',
+  )
+  bridge.addToggleSwitchInputCommands(
+    'runway_l',
+    '1-sim/command/lights/runwayL/switch_trigger',
+  )
+  bridge.addToggleSwitchInputCommands(
+    'runway_r',
+    '1-sim/command/lights/runwayR/switch_trigger',
+  )
+  bridge.addToggleSwitchInputCommands(
+    'taxi',
+    '1-sim/command/lights/landingN/switch_trigger',
+  )
   bridge.addToggleSwitchInputDataRef('position_steady', [
     'anim/43/button',
     'anim/43/button/anim',
@@ -103,73 +130,105 @@ export function initializeMappings(bridge: XPlaneBridge): void {
     'anim/45/button',
     'anim/45/button/anim',
   ])
-  bridge.addToggleSwitchInputDataRef('disengage', [
-    '1-sim/AP/desengageLever',
-    '1-sim/AP/desengageLever/anim',
-  ])
 
   /**
    * MOMENTARY SWITCHES
    */
-
-  bridge.addMomentarySwitchInputDataRef(
-    'speed_hold',
-    '1-sim/AP/spdButton',
-    TOGGLE_DATAREF,
+  bridge.addMomentarySwitchInputCommand(
+    'co',
+    '1-sim/command/AP/iasmach_button',
+    0.1,
   )
-  bridge.addMomentarySwitchInputDataRef(
-    'heading_hold',
-    '1-sim/AP/hdgHoldButton',
-    TOGGLE_DATAREF,
+  bridge.addMomentarySwitchInputCommand(
+    'n1',
+    '1-sim/command/AP/eprButton_button',
+    0.1,
   )
-  bridge.addMomentarySwitchInputDataRef(
-    'l_nav',
-    '1-sim/AP/lnavButton',
-    TOGGLE_DATAREF,
+  bridge.addMomentarySwitchInputCommand(
+    'speed',
+    '1-sim/command/AP/spdButton_button',
+    0.1,
   )
-  bridge.addMomentarySwitchInputDataRef(
-    'v_nav',
-    '1-sim/AP/vnavButton',
-    TOGGLE_DATAREF,
+  bridge.addMomentarySwitchInputCommand(
+    'vnav',
+    '1-sim/command/AP/vnavButton_button',
+    0.1,
   )
-  bridge.addMomentarySwitchInputDataRef(
-    'altitude_hold',
-    '1-sim/AP/altHoldButton',
-    TOGGLE_DATAREF,
+  bridge.addMomentarySwitchInputCommand(
+    'lvl_chg',
+    '1-sim/command/AP/flchButton_button',
+    0.1,
   )
-  bridge.addMomentarySwitchInputDataRef(
-    'vertical_speed_hold',
-    '1-sim/AP/vviButton',
-    TOGGLE_DATAREF,
+  bridge.addMomentarySwitchInputCommand(
+    'hdg_sel',
+    '1-sim/command/AP/hdgHoldButton_button',
+    0.1,
   )
-  bridge.addMomentarySwitchInputDataRef(
+  bridge.addMomentarySwitchInputCommand(
+    'lnav',
+    '1-sim/command/AP/lnavButton_button',
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'vor_loc',
+    '1-sim/command/AP/locButton_button',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
     'app',
-    '1-sim/AP/appButton',
-    TOGGLE_DATAREF,
+    '1-sim/command/AP/appButton_button',
+    0.1,
   )
-  bridge.addMomentarySwitchInputDataRef(
-    'loc',
-    '1-sim/AP/locButton',
-    TOGGLE_DATAREF,
+  bridge.addMomentarySwitchInputCommand(
+    'alt_hld',
+    '1-sim/command/AP/altHoldButton_button',
+    0.1,
   )
-  bridge.addMomentarySwitchInputDataRef(
-    'cmd',
-    '1-sim/AP/cmd_L_Button',
-    TOGGLE_DATAREF,
+  bridge.addMomentarySwitchInputCommand(
+    'vs_hld',
+    '1-sim/command/AP/vviButton_button',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'cmd_a',
+    '1-sim/command/AP/cmd_L_Button_button',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'cmd_b',
+    '1-sim/command/AP/cmd_R_Button_button',
+    0.1,
+  )
+  bridge.addMomentarySwitchInputCommand(
+    'cws_a',
+    '1-sim/command/AP/cmd_L_Button_button',
+    0.1,
   )
 
   /**
    * LEDS
    */
+  // bridge.addBooleanDataRef('1-sim/AP/atSwitcher', 'at_arm_led')
+  bridge.addBooleanDataRef(
+    '757Avionics/ap/leftFdState',
+    'flight_director_1_led',
+  )
+  bridge.addBooleanDataRef('1-sim/AP/lamp/1', 'n1_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/2', 'speed_led')
-  bridge.addBooleanDataRef('1-sim/AP/lamp/6', 'heading_led')
-  bridge.addBooleanDataRef('1-sim/AP/lamp/8', 'altitude_led')
-  bridge.addBooleanDataRef('1-sim/AP/lamp/7', 'vertical_speed_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/3', 'l_nav_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/4', 'v_nav_led')
+  bridge.addBooleanDataRef('1-sim/AP/lamp/5', 'lvl_chg_led')
+  bridge.addBooleanDataRef('1-sim/AP/lamp/6', 'heading_led')
+  bridge.addBooleanDataRef('1-sim/AP/lamp/7', 'vertical_speed_led')
+  bridge.addBooleanDataRef('1-sim/AP/lamp/8', 'altitude_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/10', 'loc_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/11', 'app_led')
-  bridge.addBooleanDataRef('1-sim/AP/lamp/12', 'cmd_led')
+  bridge.addBooleanDataRef('1-sim/AP/lamp/12', 'cmd_a_led')
+  bridge.addBooleanDataRef('1-sim/AP/lamp/14', 'cmd_b_led')
+  bridge.addBooleanDataRef('1-sim/AP/lamp/13', 'cws_a_led')
+  bridge.addBooleanDataRef(
+    '757Avionics/ap/rghtFdState',
+    'flight_director_2_led',
+  )
 
   /**
    * FMC
