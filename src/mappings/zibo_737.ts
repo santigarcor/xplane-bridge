@@ -34,7 +34,7 @@ export function initializeMappings(bridge: XPlaneBridge): void {
     threshold: 1,
     parser: ParserType.ROUND,
   })
-  bridge.addDataRef('laminar/B738/autopilot/vs_status', {
+  bridge.addDataRef('laminar/B738/autopilot/vvi_dial_show', {
     arduino_cmd: 'toggle_display_set_vertical_speed',
     threshold: 1,
     parser: ParserType.BOOLEAN,
@@ -273,9 +273,10 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   bridge.addBooleanDataRef('laminar/B738/autopilot/cmd_a_status', 'cmd_a_led')
   bridge.addBooleanDataRef('laminar/B738/autopilot/cmd_b_status', 'cmd_b_led')
   bridge.addBooleanDataRef('laminar/B738/autopilot/cws_a_status', 'cws_a_led')
+  bridge.addBooleanDataRef('laminar/B738/autopilot/cws_b_status', 'cws_b_led')
   bridge.addBooleanDataRef(
     'laminar/B738/autopilot/master_fo_status',
-    'cws_b_led',
+    'flight_director_2_led',
   )
 
   /**

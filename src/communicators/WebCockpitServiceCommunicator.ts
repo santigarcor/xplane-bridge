@@ -3,7 +3,7 @@ import { createServer, Server as HttpServer } from 'node:http'
 import { WebSocketServer, WebSocket, type RawData } from 'ws'
 import path from 'node:path'
 import type { Communicator, IncomingMessage, OutgoingMessage } from './types.js'
-import type { SupportedAircraft } from '../mappings/types.js'
+import type { SupportedAircraft } from '../mappings/index.js'
 
 export class WebCockpitServiceCommunicator implements Communicator {
   private app = express()
@@ -15,7 +15,7 @@ export class WebCockpitServiceCommunicator implements Communicator {
   constructor(
     private port: number = 8080,
     private __dirname: string,
-    private activePlane: SupportedAircraft,
+    private activePlane: SupportedAircraft | null = null,
   ) {
     this.server = createServer(this.app)
     this.wss = new WebSocketServer({ server: this.server })
@@ -46,15 +46,17 @@ export class WebCockpitServiceCommunicator implements Communicator {
     this.wss.on('connection', (ws: WebSocket) => {
       console.log('[ 📱🔗🌐 ] Device connected to WebCockpit')
 
-      console.log(
-        `[🌐] Sending active plane (${this.activePlane}) to WebCockpit`,
-      )
-      ws.send(
-        JSON.stringify({
-          cmd: 'set_active_plane',
-          value: this.activePlane,
-        } as OutgoingMessage),
-      )
+      if (this.activePlane !== null) {
+        console.log(
+          `[🌐] Sending active plane (${this.activePlane}) to WebCockpit`,
+        )
+        ws.send(
+          JSON.stringify({
+            cmd: 'set_active_plane',
+            value: this.activePlane,
+          } as OutgoingMessage),
+        )
+      }
 
       this.onConnectionStablished(this)
 
@@ -73,6 +75,14 @@ export class WebCockpitServiceCommunicator implements Communicator {
         `[🌐] Servidor Web/FMC listo en http://localhost:${this.port}`,
       )
     })
+  }
+
+  /**
+   * Sends data from the Bridge to the mobile device (Screen update)
+   */
+  public updateActivePlane(plane: SupportedAircraft): void {
+    this.activePlane = plane
+    this.sendMessage({ cmd: 'set_active_plane', value: plane })
   }
 
   /**

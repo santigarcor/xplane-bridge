@@ -1,40 +1,18 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import readline from 'readline'
-import { select } from '@inquirer/prompts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 import { XPlaneBridge } from './bridge/index.js'
-import {
-  initializer,
-  supportedAircrafts,
-  type SupportedAircraft,
-} from './mappings/index.js'
+import { initializer } from './mappings/index.js'
 
 console.log(`Loading env file from ${__dirname}`)
 process.loadEnvFile(path.join(__dirname, '..', '.env'))
 
-const selectActivePlane = async (): Promise<SupportedAircraft> => {
-  if (process.env.APP_ENV == 'development') {
-    return (process.env.ACTIVE_PLANE as SupportedAircraft) || 'zibo_737'
-  }
-
-  return select({
-    message: 'Select active plane',
-    choices: supportedAircrafts.map((plane) => ({
-      name: plane.label,
-      value: plane.id,
-    })),
-  })
-}
-
 const main = async (): Promise<void> => {
-  const activePlane: SupportedAircraft = await selectActivePlane()
-  const bridge = new XPlaneBridge(__dirname, activePlane)
+  const bridge = new XPlaneBridge(__dirname, initializer)
 
-  console.log(`[🏗️] 🚀 Initializing mappings for ${activePlane}`)
-  initializer[activePlane](bridge)
   console.log('[🏗️] 🚀 Starting bridge')
   bridge.run()
 

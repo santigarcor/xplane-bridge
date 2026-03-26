@@ -64,8 +64,8 @@ const int SWITCHES_COUNT = 31;
 // Switch pins definition
 const int SWITCH_AT_ARM = 22;
 const int SWITCH_FLIGHT_DIRECTOR_1 = 24;
-const int SWITCH_SPEED = 26;
-const int SWITCH_N1 = 28;
+const int SWITCH_N1 = 26;
+const int SWITCH_SPEED = 28;
 const int SWITCH_C_O = 30;
 const int SWITCH_SPEED_INTV = 32;
 const int SWITCH_VNAV = 34;
@@ -88,8 +88,8 @@ const int SWITCH_FLIGHT_DIRECTOR_2 = 43;
 
 const int SWITCH_LANDING_L = 7;
 const int SWITCH_LANDING_R = 6;
-const int SWITCH_RUNWAY_R = 5;
-const int SWITCH_RUNWAY_L = 4;
+const int SWITCH_RUNWAY_R = 4;
+const int SWITCH_RUNWAY_L = 5;
 
 const int SWITCH_TAXI = 8;
 const int SWITCH_LOGO = 11;
@@ -446,7 +446,7 @@ void initDisplays() {
   // Initialize 8 digits Displays
   for (int display = 0; display < ledControl.getDeviceCount(); display++) {
     ledControl.shutdown(display, false);
-    ledControl.setIntensity(display, 1);
+    ledControl.setIntensity(display, 0);
     ledControl.clearDisplay(display);
     // ledControl.setScanLimit(display, 8);
   }
