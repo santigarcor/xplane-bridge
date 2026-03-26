@@ -158,17 +158,18 @@ struct DisplayCommand {
   int firstDigitPosition;
   int maxLength;
   bool showSign;
+  bool showLeadingZeros;
 };
 
 LedControl ledControl = LedControl(DISPLAY_PIN_DIN, DISPLAY_PIN_CLK, DISPLAY_PIN_CS, DISPLAYS_COUNT);
 // All displayCommands' name MUST start with set_
 DisplayCommand displayCommands[DISPLAY_COMMANDS_COUNT] = {
-  { "set_course_1", 0, 5, 3, false },       // set_course_1 on display #0, with first digit at 5, max length 3.
-  { "set_speed", 0, 0, 3, false },          // set_spd on display #0, with first digit at 0, max length 3.
-  { "set_heading", 1, 0, 3, false },        // set_hdg on display #1, with first digit at 0, max length 3.
-  { "set_altitude", 2, 1, 5, false },       // set_alt on display #2, with first digit at 1, max length 5.
-  { "set_vertical_speed", 3, 3, 5, true },  // set_v_spd on display #3, with first digit at 3, max length 5.
-  { "set_course_2", 4, 0, 3, false }        // set_course_2 on display #4, with first digit at 5, max length 3.
+  { "set_course_1", 0, 5, 3, false, true },        // set_course_1 on display #0, with first digit at 5, max length 3.
+  { "set_speed", 0, 0, 3, false, true },           // set_spd on display #0, with first digit at 0, max length 3.
+  { "set_heading", 1, 0, 3, false, true },         // set_hdg on display #1, with first digit at 0, max length 3.
+  { "set_altitude", 2, 1, 5, false, false },       // set_alt on display #2, with first digit at 1, max length 5.
+  { "set_vertical_speed", 3, 3, 5, true, false },  // set_v_spd on display #3, with first digit at 3, max length 5.
+  { "set_course_2", 4, 0, 3, false, true }         // set_course_2 on display #4, with first digit at 5, max length 3.
 };
 
 /*
@@ -330,7 +331,11 @@ void setDisplay(DisplayCommand displayCommand, long value) {
 
   while (digitPosition <= maxDigitPosition) {
     byte digitValue = abs(value) % 10;  // Get the last number (ex: of 123, we get 3)
-    ledControl.setDigit(displayCommand.displayToShow, digitPosition, digitValue, false);
+    if (!displayCommand.showLeadingZeros && value == 0 && digitPosition > displayCommand.firstDigitPosition) {
+      ledControl.setRow(displayCommand.displayToShow, digitPosition, B00000000);  // blank leading zeros
+    } else {
+      ledControl.setDigit(displayCommand.displayToShow, digitPosition, digitValue, false);
+    }
     value = value / 10;  // Remove last number (ex: from 123 to 12)
     digitPosition++;     // next digit position
   }
