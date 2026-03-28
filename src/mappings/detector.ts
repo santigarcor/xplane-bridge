@@ -3,6 +3,7 @@ import type { SupportedAircraft } from './types.js'
 const PLANE_PATTERNS: { pattern: RegExp; plane: SupportedAircraft }[] = [
   { pattern: /737/i, plane: 'zibo_737' },
   { pattern: /757/i, plane: 'ff_757' },
+  { pattern: /172/i, plane: 'c172' },
 ]
 
 export function detectPlane(liveryPath: string): SupportedAircraft | null {
