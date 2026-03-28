@@ -57,7 +57,7 @@ export type DataRefMapping = {
   arduino_cmd?: string | undefined
   web_cockpit_cmd?: string | undefined
   threshold: number
-  parser: ParserType | undefined
+  parser: ParserType | ParserFunction | undefined
   value_map?: ValueMap | undefined
 }
 

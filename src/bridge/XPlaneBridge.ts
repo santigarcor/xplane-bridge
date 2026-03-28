@@ -14,6 +14,7 @@ import type {
   ValueMap,
   XPlaneIdentifierType,
   XplaneWebsocketMessage,
+  ParserFunction,
 } from './types.js'
 import { ParserType, TOGGLE_DATAREF, XPlaneMessageType } from './types.js'
 import { ensureArray } from './helpers.js'
@@ -318,7 +319,7 @@ export class XPlaneBridge {
   }
 
   private async subscribeToLiveryPath(): Promise<void> {
-    const liveryPathDataRef = 'sim/aircraft/view/acf_livery_path'
+    const liveryPathDataRef = 'sim/aircraft/view/acf_relative_path'
     const dataRefId = await this.getXPlaneIdentifierId(
       'datarefs',
       liveryPathDataRef,
@@ -368,8 +369,6 @@ export class XPlaneBridge {
   }
 
   public async run() {
-    this.initializeWebSocket()
-
     this.arduino
       .onMessage(this.handleArduinoMessage.bind(this))
       .onConnection(this.updateNewConnection.bind(this))
@@ -378,6 +377,8 @@ export class XPlaneBridge {
       .onMessage(this.handleArduinoMessage.bind(this))
       .onConnection(this.updateNewConnection.bind(this))
       .connect()
+
+    this.initializeWebSocket()
   }
 
   private initializeWebSocket() {
@@ -444,10 +445,12 @@ export class XPlaneBridge {
 
   private parseValue(
     value: any,
-    parserType?: ParserType | undefined,
+    parserType?: ParserType | ParserFunction | undefined,
     valueMap?: ValueMap | undefined,
   ) {
-    return !parserType ? value : parserLibrary[parserType](value, valueMap)
+    if (!parserType) return value
+    if (typeof parserType === 'function') return parserType(value)
+    return parserLibrary[parserType](value, valueMap)
   }
 
   private shouldSendUpdate(

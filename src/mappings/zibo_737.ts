@@ -39,11 +39,11 @@ export function initializeMappings(bridge: XPlaneBridge): void {
     threshold: 1,
     parser: ParserType.BOOLEAN,
   })
-  // bridge.addDataRef('laminar/B738/autopilot/speed_mode', { I need to find the correct dataref for this
-  //   arduino_cmd: 'toggle_display_set_speed',
-  //   threshold: 1,
-  //   parser: ParserType.BOOLEAN,
-  // })
+  bridge.addDataRef('laminar/B738/autopilot/speed_mode', {
+    arduino_cmd: 'toggle_display_set_speed',
+    threshold: 1,
+    parser: (v) => (v === 7 || v === 9 ? 0 : 1),
+  })
 
   /**
    * ENCODERS
