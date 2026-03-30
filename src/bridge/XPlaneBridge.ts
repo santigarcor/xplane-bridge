@@ -369,6 +369,7 @@ export class XPlaneBridge {
   }
 
   public async run() {
+    this.initializeWebSocket()
     this.arduino
       .onMessage(this.handleArduinoMessage.bind(this))
       .onConnection(this.updateNewConnection.bind(this))
@@ -377,8 +378,6 @@ export class XPlaneBridge {
       .onMessage(this.handleArduinoMessage.bind(this))
       .onConnection(this.updateNewConnection.bind(this))
       .connect()
-
-    this.initializeWebSocket()
   }
 
   private initializeWebSocket() {

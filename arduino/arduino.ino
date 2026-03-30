@@ -408,7 +408,7 @@ void processSerialInput() {
     }
 
     if (ledFound) {
-      analogWrite(leds[i].pin, doc["value"] == 0 ? LOW : 128);
+      digitalWrite(leds[i].pin, doc["value"] == 0 ? LOW : HIGH);
     }
   }
 }
@@ -476,7 +476,7 @@ void initLeds() {
   // Initialize LED pins
   for (int i = 0; i < LEDS_COUNT; i++) {
     pinMode(leds[i].pin, OUTPUT);
-    analogWrite(leds[i].pin, LOW);
+    digitalWrite(leds[i].pin, LOW);
   }
 }
 
