@@ -4,7 +4,7 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   /**
    * DISPLAYS
    */
-  bridge.addDataRef('sim/cockpit/radios/nav1_course_degm', {
+  bridge.addDataRef('sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot', {
     arduino_cmd: 'set_course_1',
     threshold: 1,
     parser: ParserType.ROUND,
@@ -14,11 +14,11 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   //   threshold: 1,
   //   parser: ParserType.ROUND,
   // })
-  // bridge.addDataRef('sim/cockpit/autopilot/heading', {
-  //   arduino_cmd: 'set_heading',
-  //   threshold: 1,
-  //   parser: ParserType.ROUND,
-  // })
+  bridge.addDataRef('sim/cockpit/autopilot/heading_mag', {
+    arduino_cmd: 'set_heading',
+    threshold: 1,
+    parser: ParserType.ROUND,
+  })
   // bridge.addDataRef('sim/cockpit/pressure/cabin_altitude_actual_ft', {
   //   arduino_cmd: 'set_altitude',
   //   threshold: 100,
@@ -29,7 +29,7 @@ export function initializeMappings(bridge: XPlaneBridge): void {
     threshold: 50,
     parser: ParserType.ROUND,
   })
-  bridge.addDataRef('sim/cockpit/radios/nav2_course_degm2', {
+  bridge.addDataRef('sim/cockpit2/radios/actuators/hsi_obs_deg_mag_copilot', {
     arduino_cmd: 'set_course_2',
     threshold: 1,
     parser: ParserType.ROUND,
@@ -84,44 +84,54 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   // )
   // bridge.addToggleSwitchInputCommands(
   //   'flight_director_1',
-  //   'laminar/B738/autopilot/flight_director_toggle',
-  //   'laminar/B738/autopilot/flight_director_toggle',
+  //   'sim/fuel/fuel_pumps_on',
+  //   'sim/fuel/fuel_pumps_off',
   // )
-  // bridge.addToggleSwitchInputDataRef(
-  //   'landing_l',
-  //   'laminar/B738/switch/land_lights_left_pos',
-  // )
-  // bridge.addToggleSwitchInputDataRef(
-  //   'landing_r',
-  //   'laminar/B738/switch/land_lights_right_pos',
-  // )
-  // bridge.addToggleSwitchInputDataRef(
-  //   'runway_l',
-  //   'laminar/B738/toggle_switch/rwy_light_left',
-  // )
-  // bridge.addToggleSwitchInputDataRef(
-  //   'runway_r',
-  //   'laminar/B738/toggle_switch/rwy_light_right',
-  // )
-  // bridge.addToggleSwitchInputCommands(
-  //   'taxi',
-  //   'laminar/B738/toggle_switch/taxi_light_brigh_toggle',
-  //   'laminar/B738/toggle_switch/taxi_light_brigh_toggle',
-  // )
-  // bridge.addToggleSwitchInputCommands(
-  //   'position_strobe',
-  //   'laminar/B738/toggle_switch/position_light_up',
-  //   'laminar/B738/toggle_switch/position_light_down',
-  // )
+  bridge.addToggleSwitchInputCommands(
+    'landing_l',
+    'sim/fuel/fuel_pumps_on',
+    'sim/fuel/fuel_pumps_off',
+  )
+  bridge.addToggleSwitchInputCommands(
+    'landing_r',
+    'sim/lights/beacon_lights_on',
+    'sim/lights/beacon_lights_off',
+  )
+  bridge.addToggleSwitchInputCommands(
+    'runway_l',
+    'sim/lights/landing_lights_on',
+    'sim/lights/landing_lights_off',
+  )
+  bridge.addToggleSwitchInputCommands(
+    'runway_r',
+    'sim/lights/taxi_lights_on',
+    'sim/lights/taxi_lights_off',
+  )
+  bridge.addToggleSwitchInputCommands(
+    'logo',
+    'sim/lights/strobe_lights_on',
+    'sim/lights/strobe_lights_off',
+  )
+  bridge.addToggleSwitchInputCommands(
+    'taxi',
+    'sim/lights/nav_lights_on',
+    'sim/lights/nav_lights_off',
+  )
+  bridge.addToggleSwitchInputCommands(
+    'position_steady',
+    ['sim/ice/pitot_heat_2_on', 'sim/ice/pitot_heat0_on'],
+    ['sim/ice/pitot_heat_2_off', 'sim/ice/pitot_heat0_off'],
+  )
   // bridge.addToggleSwitchInputCommands(
   //   'position_steady',
   //   'laminar/B738/toggle_switch/position_light_down',
   //   'laminar/B738/toggle_switch/position_light_up',
   // )
-  // bridge.addToggleSwitchInputDataRef(
-  //   'anti_col',
-  //   'sim/cockpit2/switches/beacon_on',
-  // )
+  bridge.addToggleSwitchInputCommands(
+    'anti_col',
+    'sim/lights/nav_lights_on',
+    'sim/lights/nav_lights_off',
+  )
   // bridge.addToggleSwitchInputDataRef(
   //   'wing',
   //   'laminar/B738/toggle_switch/wing_light',
@@ -142,11 +152,11 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   /**
    * MOMENTARY SWITCHES
    */
-  // bridge.addMomentarySwitchInputCommand(
-  //   'c_o',
-  //   'laminar/B738/autopilot/change_over_press',
-  //   0.1,
-  // )
+  bridge.addMomentarySwitchInputCommand(
+    'c_o',
+    'sim/instruments/timer_mode',
+    0.1,
+  )
   // bridge.addMomentarySwitchInputCommand(
   //   'n1',
   //   'laminar/B738/autopilot/n1_press',
@@ -157,11 +167,11 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   //   'laminar/B738/autopilot/speed_press',
   //   0.1,
   // )
-  // bridge.addMomentarySwitchInputCommand(
-  //   'speed_intv',
-  //   'laminar/B738/autopilot/spd_interv',
-  //   0.1,
-  // )
+  bridge.addMomentarySwitchInputCommand(
+    'speed_intv',
+    'sim/instruments/timer_reset',
+    0.1,
+  )
   // bridge.addMomentarySwitchInputCommand(
   //   'vnav',
   //   'laminar/B738/autopilot/vnav_press',
