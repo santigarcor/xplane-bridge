@@ -31,13 +31,18 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   })
   bridge.addDataRef('1-sim/radios/nav3_obs_deg_mag_pilot', {
     arduino_cmd: 'set_course_2',
-    threshold: 50,
+    threshold: 1,
     parser: ParserType.ROUND,
   })
   bridge.addDataRef('sim/cockpit2/autopilot/vvi_status', {
     arduino_cmd: 'toggle_display_set_vertical_speed',
     threshold: 1,
     parser: ParserType.BOOLEAN,
+  })
+  bridge.addDataRef('sim/cockpit2/autopilot/vnav_status', {
+    arduino_cmd: 'toggle_display_set_speed',
+    threshold: 1,
+    parser: (v) => (v === 0 ? 1 : 0),
   })
 
   /**
