@@ -6,6 +6,8 @@ export class ArduinoSerialCommunicator implements Communicator {
   private serialPort: SerialPort | null = null
   private parser: ReadlineParser | null = null
   private isAttemptingConnection: boolean = false
+  private isConnectedFlag: boolean = false
+
   /**
    * Callback that will be executed when Arduino/WebCockpit sends a user interaction
    */
@@ -64,12 +66,13 @@ export class ArduinoSerialCommunicator implements Communicator {
         return
       }
 
-      // Wait 2 seconds for Arduino reset
+      // Wait 2.55 seconds for Arduino reset
       setTimeout(() => {
         console.log(`[📟] ✅ Connected to Arduino on port "${portPath}"`)
         this.isAttemptingConnection = false
+        this.isConnectedFlag = true
         this.onConnectionStablished(this)
-      }, 2000)
+      }, 2550)
     })
 
     this.parser.on('data', (line: string) => {
@@ -83,6 +86,7 @@ export class ArduinoSerialCommunicator implements Communicator {
 
     this.serialPort.on('close', () => {
       console.warn('[📟] ⚠️ Serial connection lost. Reconnecting...')
+      this.isConnectedFlag = false
       this.scheduleReconnection()
     })
   }
@@ -117,5 +121,9 @@ export class ArduinoSerialCommunicator implements Communicator {
         console.log('[📟] ✅ Serial port closed successfully.')
       }
     })
+  }
+
+  public isConnected(): boolean {
+    return this.isConnectedFlag
   }
 }

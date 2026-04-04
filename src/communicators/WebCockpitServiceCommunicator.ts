@@ -101,4 +101,8 @@ export class WebCockpitServiceCommunicator implements Communicator {
     this.wss.close()
     this.server.close()
   }
+
+  public isConnected(): boolean {
+    return this.wss.clients.size > 0
+  }
 }

@@ -558,12 +558,14 @@ export class XPlaneBridge {
 
             if (
               mapping.arduino_cmd !== undefined &&
-              mapping.web_cockpit_cmd === undefined
+              this.arduino.isConnected()
             ) {
               this.arduino.sendMessage({ cmd: command, value: parsedValue })
-            } else if (
+            }
+
+            if (
               mapping.web_cockpit_cmd !== undefined &&
-              mapping.arduino_cmd === undefined
+              this.webCockpit.isConnected()
             ) {
               this.webCockpit.sendMessage({ cmd: command, value: parsedValue })
             }

@@ -35,4 +35,5 @@ export interface Communicator {
   sendMessage(data: OutgoingMessage): void
   connect(): Promise<void>
   disconnect(): void
+  isConnected(): boolean
 }
