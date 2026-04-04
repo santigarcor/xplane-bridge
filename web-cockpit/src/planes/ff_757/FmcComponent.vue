@@ -20,7 +20,7 @@ const store = use757Store()
         class="whitespace-pre"
         :class="{
           'leading-[1.2]': lineIndex == 0,
-          'leading-[0.2] lg:leading-[0.27]':
+          'leading-[0.27] lg:leading-[0.27]':
             isPair(lineIndex + 1) && ![0, store.fmcLines.length - 1].includes(lineIndex),
           'leading-none':
             !isPair(lineIndex + 1) && ![0, store.fmcLines.length - 1].includes(lineIndex),
