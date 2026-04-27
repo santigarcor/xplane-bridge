@@ -262,7 +262,7 @@ export class XPlaneBridge {
     }
 
     try {
-      const url = `${this.restUrl}/${type}?filter[name]=${name}`
+      const url = `${this.restUrl}/${type}?filter[name]=${encodeURIComponent(name)}`
 
       const response = await fetch(url)
       const jsonResponse: any = await response.json()
