@@ -60,7 +60,7 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   )
   bridge.addRotaryEncoderCommands(
     'altitude_encoder',
-    'sim/GPS/g1000n1_alt_outer_up',
+    'sim/GPS/g1000n1_alt_inner_up',
     'sim/GPS/g1000n1_alt_inner_down',
   )
   bridge.addRotaryEncoderCommands(
