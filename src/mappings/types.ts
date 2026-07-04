@@ -5,6 +5,7 @@ export type MappingsInitializer = {
   ff_757: (bridge: XPlaneBridge) => void
   ff_777: (bridge: XPlaneBridge) => void
   c172: (bridge: XPlaneBridge) => void
+  c172_g1000: (bridge: XPlaneBridge) => void
 }
 
 export type SupportedAircraft = keyof MappingsInitializer

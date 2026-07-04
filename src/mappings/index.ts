@@ -3,6 +3,7 @@ import { initializeMappings as initFF777 } from './ff_777.js'
 import type { MappingsInitializer, SupportedAircraft } from './types.js'
 import { initializeMappings as initZibo737 } from './zibo_737.js'
 import { initializeMappings as initC172 } from './c172.js'
+import { initializeMappings as initC172G1000 } from './c172_g1000.js'
 export { detectPlane } from './detector.js'
 
 const initializer: MappingsInitializer = {
@@ -10,6 +11,7 @@ const initializer: MappingsInitializer = {
   ff_757: initFF757,
   ff_777: initFF777,
   c172: initC172,
+  c172_g1000: initC172G1000,
 }
 
 const supportedAircrafts: { id: SupportedAircraft; label: string }[] = [
@@ -17,6 +19,7 @@ const supportedAircrafts: { id: SupportedAircraft; label: string }[] = [
   { id: 'ff_757', label: 'FF 757' },
   { id: 'ff_777', label: 'FF 777' },
   { id: 'c172', label: 'Cessna 172' },
+  { id: 'c172_g1000', label: 'Cessna 172 G1000' },
 ]
 
 export {
