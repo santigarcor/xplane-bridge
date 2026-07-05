@@ -2,7 +2,6 @@ import WebSocket, { type RawData } from 'ws'
 import 'dotenv/config'
 import {
   ArduinoSerialCommunicator,
-  WebCockpitServiceCommunicator,
   type Communicator,
   type IncomingMessage,
 } from '../communicators/index.js'
@@ -37,7 +36,6 @@ const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
 export class XPlaneBridge {
   private webSocket: WebSocket | null = null
   private arduino: ArduinoSerialCommunicator
-  private webCockpit: WebCockpitServiceCommunicator
   private requestIdCounter: number = 1
   private websocketsUrl: string
   private restUrl: string
@@ -70,11 +68,6 @@ export class XPlaneBridge {
 
     this.arduino = new ArduinoSerialCommunicator(
       parseInt(process.env.ARDUINO_BAUD || '9600'),
-    )
-    this.webCockpit = new WebCockpitServiceCommunicator(
-      parseInt(process.env.WEBFMC_PORT || '8080'),
-      __dirname,
-      null,
     )
   }
 
@@ -308,7 +301,6 @@ export class XPlaneBridge {
   public close() {
     this.webSocket?.close()
     this.arduino.disconnect()
-    this.webCockpit.disconnect()
   }
 
   private clearMappings(): void {
@@ -362,7 +354,6 @@ export class XPlaneBridge {
     this.clearMappings()
     this.currentPlane = plane
     this.planeInitializer[plane](this)
-    this.webCockpit.updateActivePlane(plane)
 
     await this.subscribeToLiveryPath()
     await this.subscribeToAllDataReferences()
@@ -371,10 +362,6 @@ export class XPlaneBridge {
   public async run() {
     this.initializeWebSocket()
     this.arduino
-      .onMessage(this.handleArduinoMessage.bind(this))
-      .onConnection(this.updateNewConnection.bind(this))
-      .connect()
-    this.webCockpit
       .onMessage(this.handleArduinoMessage.bind(this))
       .onConnection(this.updateNewConnection.bind(this))
       .connect()
@@ -477,10 +464,8 @@ export class XPlaneBridge {
       const mapping = this.dataRefMappings[dataRefName]
 
       if (
-        (connection instanceof ArduinoSerialCommunicator &&
-          mapping!.arduino_cmd === command) ||
-        (connection instanceof WebCockpitServiceCommunicator &&
-          mapping!.web_cockpit_cmd === command)
+        connection instanceof ArduinoSerialCommunicator &&
+        mapping!.arduino_cmd === command
       ) {
         connection.sendMessage({
           cmd: command,
@@ -529,7 +514,7 @@ export class XPlaneBridge {
             }
 
             const mapping = this.dataRefMappings[dataRefName]
-            const command = mapping.arduino_cmd || mapping.web_cockpit_cmd
+            const command = mapping.arduino_cmd
             const parserType = mapping.parser
             const valueMap = mapping.value_map
             const threshold = mapping.threshold || 0
@@ -561,13 +546,6 @@ export class XPlaneBridge {
               this.arduino.isConnected()
             ) {
               this.arduino.sendMessage({ cmd: command, value: parsedValue })
-            }
-
-            if (
-              mapping.web_cockpit_cmd !== undefined &&
-              this.webCockpit.isConnected()
-            ) {
-              this.webCockpit.sendMessage({ cmd: command, value: parsedValue })
             }
 
             this.previousValues[command] = {
