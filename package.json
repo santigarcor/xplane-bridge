@@ -6,10 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "APP_ENV=development tsx watch src/index.ts",
-    "cockpit:dev": "cd web-cockpit && npm run dev",
     "bundle": "esbuild src/index.ts --bundle --minify --platform=node --format=esm --outfile=dist/index.js --external:serialport --external:node:* --banner:js=\"import { createRequire as _createRequire } from 'node:module'; const require = _createRequire(import.meta.url);\"",
     "start": "node dist/index.js",
-    "cockpit:build": "cd web-cockpit && npm run build",
     "dist:all": "npm run build:cockpit && npm run bundle"
   },
   "keywords": [],

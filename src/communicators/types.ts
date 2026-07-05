@@ -1,5 +1,5 @@
 /**
- * Message sent from Arduino/WebCockpit to XPlane Bridge
+ * Message sent from Arduino to XPlane Bridge
  * when user makes an interaction (button press, knob turn, etc.)
  */
 export type IncomingMessage = {
@@ -8,7 +8,7 @@ export type IncomingMessage = {
 }
 
 /**
- * Message sent from XPlane Bridge to Arduino/WebCockpit
+ * Message sent from XPlane Bridge to Arduino
  * when an update occurs in the flight simulator
  */
 export type OutgoingMessage = {
@@ -20,17 +20,17 @@ export type OutgoingMessage = {
 
 export interface Communicator {
   /**
-   * Receives the callback that will be executed when Arduino/WebCockpit sends a user interaction
+   * Receives the callback that will be executed when Arduino sends a user interaction
    */
   onMessage(onMessageReceived: (data: IncomingMessage) => void): this
 
   /**
-   * Receives the callback that will be executed when a new connection is established with Arduino/WebCockpit
+   * Receives the callback that will be executed when a new connection is established with Arduino
    */
   onConnection(onNewConnection: (connection: Communicator) => void): this
 
   /**
-   * Sends data from the Bridge to Arduino/WebCockpit when an update occurs in the flight simulator
+   * Sends data from the Bridge to Arduino when an update occurs in the flight simulator
    */
   sendMessage(data: OutgoingMessage): void
   connect(): Promise<void>

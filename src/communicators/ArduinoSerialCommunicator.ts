@@ -9,7 +9,7 @@ export class ArduinoSerialCommunicator implements Communicator {
   private isConnectedFlag: boolean = false
 
   /**
-   * Callback that will be executed when Arduino/WebCockpit sends a user interaction
+   * Callback that will be executed when Arduino sends a user interaction
    */
   private onMessageReceived: (data: IncomingMessage) => void = () => {}
   private onConnectionStablished: (connection: Communicator) => void = () => {}
