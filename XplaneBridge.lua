@@ -30,6 +30,27 @@ function kill_node_bridge()
     end
 end
 
+function restart_node_bridge()
+    -- 1. Matar cualquier instancia previa que esté corriendo
+    os.execute("pkill -f 'node dist/bridge.js'")
+
+    -- 2. Darle un momento al sistema para liberar el puerto serial
+    os.execute("sleep 1")
+
+    -- 3. Volver a lanzar el script en el background
+    local cmd = "/Users/santiago/Repos/xplane-bridge/start_bridge.sh > /dev/null 2>&1 &"
+    os.execute(cmd)
+
+    logMsg("X-Plane Bridge: Reinicio manual ejecutado.")
+end
+
+-- Esto crea un comando oficial dentro de X-Plane
+create_command("FlyWithLua/Bridge/Restart",
+               "Reiniciar el bridge de Node.js",
+               "restart_node_bridge()",
+               "",
+               "")
+
 -- Se ejecuta justo antes de que FlyWithLua se apague (al cerrar el simulador)
 do_on_exit("kill_node_bridge()")
 start_node_bridge()
