@@ -2,6 +2,15 @@ import { XPlaneBridge, ParserType, TOGGLE_DATAREF } from '../bridge/index.js'
 
 export function initializeMappings(bridge: XPlaneBridge): void {
   /**
+   * PANEL POWER
+   */
+  bridge.addDataRef('laminar/B738/electric/battery_pos', {
+    arduino_cmd: 'power',
+    threshold: 0,
+    parser: ParserType.BOOLEAN,
+  })
+
+  /**
    * DISPLAYS
    */
   bridge.addDataRef('laminar/B738/autopilot/course_pilot', {

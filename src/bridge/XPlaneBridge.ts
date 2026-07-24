@@ -16,7 +16,7 @@ import type {
   ParserFunction,
 } from './types.js'
 import { ParserType, TOGGLE_DATAREF, XPlaneMessageType } from './types.js'
-import { ensureArray } from './helpers.js'
+import { ensureArray, toBoolean, decodeBase64 } from './helpers.js'
 import {
   detectPlane,
   type MappingsInitializer,
@@ -24,13 +24,13 @@ import {
 } from '../mappings/index.js'
 
 const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
-  [ParserType.BOOLEAN]: (v) => (v > 0 ? 1 : 0),
+  [ParserType.BOOLEAN]: toBoolean,
   [ParserType.ROUND]: (v) => Math.round(v),
   [ParserType.TO_DEGREES]: (v) => Math.round(v * (180 / Math.PI)),
   [ParserType.VALUE_MAP]: (v, map) =>
     map && map[v] !== undefined ? map[v] : v,
   [ParserType.NONE]: (v) => v,
-  [ParserType.BASE64DECODE]: (v) => Buffer.from(v, 'base64').toString('utf-8'),
+  [ParserType.BASE64DECODE]: decodeBase64,
 }
 
 export class XPlaneBridge {

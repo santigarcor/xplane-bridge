@@ -1,7 +1,21 @@
 import { XPlaneBridge, ParserType, TOGGLE_DATAREF } from '../bridge/index.js'
+import { atIndex, pipe } from '../bridge/helpers.js'
 
 export function initializeMappings(bridge: XPlaneBridge): void {
-  // sim/cockpit/electrical/battery_on 1/0 defines electrical power
+  /**
+   * PANEL POWER
+   */
+  bridge.addDataRef('sim/cockpit/electrical/battery_on', {
+    arduino_cmd: 'power',
+    threshold: 0,
+    parser: ParserType.BOOLEAN,
+  })
+  // Array dataref variant (index then convert), for reference:
+  //   bridge.addDataRef('sim/cockpit2/electrical/bus_volts', {
+  //     arduino_cmd: 'power',
+  //     threshold: 0,
+  //     parser: pipe(atIndex(0), (v) => (v > 10 ? 1 : 0)),
+  //   })
 
   /**
    * DISPLAYS

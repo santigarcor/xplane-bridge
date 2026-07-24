@@ -181,7 +181,13 @@ const int LEDS_COUNT = 17;
 struct LedCommand {
   const char *name;
   int pin;
+  bool state;
 };
+
+// Whether the aircraft is powered on. When false, displays are blanked
+// (via LedControl shutdown) and LEDs are held off, regardless of their
+// last commanded state.
+bool panelPowered = true;
 
 LedCommand leds[LEDS_COUNT] = {
   { "at_arm_led", A15 },
@@ -369,6 +375,25 @@ void toggleDisplay(String command, long value) {
   }
 }
 
+/**
+ * Turns the whole panel on/off in response to aircraft power state.
+ * Displays are blanked via LedControl shutdown (digit data is preserved,
+ * so they show the correct value again as soon as power is restored).
+ * LEDs are forced off but keep their last commanded state, so they light
+ * up correctly again on power-on without needing a resend from the bridge.
+ */
+void setPanelPower(bool on) {
+  panelPowered = on;
+
+  for (int display = 0; display < ledControl.getDeviceCount(); display++) {
+    ledControl.shutdown(display, !on);  // true = power-down (blank), data kept
+  }
+
+  for (int i = 0; i < LEDS_COUNT; i++) {
+    digitalWrite(leds[i].pin, (panelPowered && leds[i].state) ? HIGH : LOW);
+  }
+}
+
 void processSerialInput() {
   if (!Serial.available()) {
     return;
@@ -394,6 +419,8 @@ void processSerialInput() {
     }
   } else if (cmd.startsWith("toggle_display")) {
     toggleDisplay(cmd, doc["value"]);
+  } else if (cmd == "power") {
+    setPanelPower(doc["value"].as<int>() != 0);
   } else {
     // Instruction for LEDs
     int i = 0;
@@ -408,7 +435,8 @@ void processSerialInput() {
     }
 
     if (ledFound) {
-      digitalWrite(leds[i].pin, doc["value"] == 0 ? LOW : HIGH);
+      leds[i].state = (doc["value"].as<int>() != 0);
+      digitalWrite(leds[i].pin, (panelPowered && leds[i].state) ? HIGH : LOW);
     }
   }
 }
