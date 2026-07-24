@@ -16,22 +16,12 @@ import type {
   ParserFunction,
 } from './types.js'
 import { ParserType, TOGGLE_DATAREF, XPlaneMessageType } from './types.js'
-import { ensureArray, toBoolean, decodeBase64 } from './helpers.js'
+import { ensureArray, parserLibrary } from './helpers.js'
 import {
   detectPlane,
   type MappingsInitializer,
   type SupportedAircraft,
 } from '../mappings/index.js'
-
-const parserLibrary: Record<ParserType, (v: any, extra?: any) => any> = {
-  [ParserType.BOOLEAN]: toBoolean,
-  [ParserType.ROUND]: (v) => Math.round(v),
-  [ParserType.TO_DEGREES]: (v) => Math.round(v * (180 / Math.PI)),
-  [ParserType.VALUE_MAP]: (v, map) =>
-    map && map[v] !== undefined ? map[v] : v,
-  [ParserType.NONE]: (v) => v,
-  [ParserType.BASE64DECODE]: decodeBase64,
-}
 
 export class XPlaneBridge {
   private webSocket: WebSocket | null = null
@@ -245,7 +235,6 @@ export class XPlaneBridge {
     )
   }
 
-  // Traducción de get_dataref_id usando fetch nativo
   async getXPlaneIdentifierId(
     type: XPlaneIdentifierType,
     name: string,

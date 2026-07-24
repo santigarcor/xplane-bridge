@@ -16,10 +16,13 @@ This project provides an interface between X-Plane 12 and Arduino, enabling cust
 
 1. Clone this repository.
 2. Run `npm install`.
-3. Inside the index.ts define the mappings for the commands/datarefs from Arduino to X-Plane and viceversa.
-4. Start X-Plane.
-5. Run `npm run dev`.
-6. Fly and enjoy.
+3. Inside the `mappings/` are all the supported aircraft, you can extend the code to add new planes.
+4. Run `npm run bundle`
+5. Start X-Plane.
+6. Run `node dist/bridge.js`.
+7. Fly and enjoy.
+
+If you want to use it with the lua script you will need to update the paths in the `start_bridge.sh` and inside the XplaneBridge.lua and paste the latter into the Lua Scripts folder.
 
 ## License
 
