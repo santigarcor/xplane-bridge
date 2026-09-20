@@ -132,6 +132,12 @@ export function initializeMappings(bridge: XPlaneBridge): void {
     'anim/43/button',
     'anim/43/button/anim',
   ])
+  bridge.addToggleSwitchInputDataRef('position_strobe', [
+    'anim/43/button',
+    'anim/43/button/anim',
+    'anim/45/button',
+    'anim/45/button/anim',
+  ])
   bridge.addToggleSwitchInputDataRef('anti_col', [
     'anim/44/button',
     'anim/44/button/anim',
@@ -141,8 +147,8 @@ export function initializeMappings(bridge: XPlaneBridge): void {
     'anim/46/button/anim',
   ])
   bridge.addToggleSwitchInputDataRef('logo', [
-    'anim/45/button',
-    'anim/45/button/anim',
+    'anim/52/button',
+    'anim/52/button/anim',
   ])
 
   /**
@@ -175,7 +181,7 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   )
   bridge.addMomentarySwitchInputCommand(
     'hdg_sel',
-    '1-sim/command/AP/hdgHoldButton_button',
+    '1-sim/command/AP/hdgConfButton_button',
     0.1,
   )
   bridge.addMomentarySwitchInputCommand(
@@ -231,7 +237,8 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   bridge.addBooleanDataRef('1-sim/AP/lamp/3', 'l_nav_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/4', 'v_nav_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/5', 'lvl_chg_led')
-  bridge.addBooleanDataRef('1-sim/AP/lamp/6', 'heading_led')
+  bridge.addBooleanDataRef('1-sim/AP/hdgConfButton', 'heading_led')
+  // bridge.addBooleanDataRef('1-sim/AP/lamp/6', 'heading_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/7', 'vertical_speed_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/8', 'altitude_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/10', 'loc_led')
