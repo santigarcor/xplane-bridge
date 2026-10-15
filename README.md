@@ -19,10 +19,26 @@ This project provides an interface between X-Plane 12 and Arduino, enabling cust
 3. Inside the `mappings/` are all the supported aircraft, you can extend the code to add new planes.
 4. Run `npm run bundle`
 5. Start X-Plane.
-6. Run `node dist/bridge.js`.
+6. Run `npm start`.
 7. Fly and enjoy.
 
-If you want to use it with the lua script you will need to update the paths in the `start_bridge.sh` and inside the XplaneBridge.lua and paste the latter into the Lua Scripts folder.
+## Launching from X-Plane (FlyWithLua)
+
+`XplaneBridge.lua` starts the bridge when FlyWithLua loads, stops it when X-Plane closes and adds a `FlyWithLua/Bridge/Restart` command. It works on Windows (`start_bridge.ps1`) and macOS (`start_bridge.sh`).
+
+1. Run `npm run bundle`.
+2. The repo paths are hardcoded at the top of `XplaneBridge.lua` and in `start_bridge.sh`. Update them if you cloned the repo somewhere else.
+3. Symlink the script into the FlyWithLua `Scripts` folder so `git pull` keeps it up to date:
+   - Windows (admin PowerShell, or Developer Mode enabled):
+     ```powershell
+     New-Item -ItemType SymbolicLink -Path "<X-Plane 12>\Resources\plugins\FlyWithLua\Scripts\XplaneBridge.lua" -Target "<repo>\XplaneBridge.lua"
+     ```
+   - macOS:
+     ```sh
+     ln -s <repo>/XplaneBridge.lua "<X-Plane 12>/Resources/plugins/FlyWithLua/Scripts/XplaneBridge.lua"
+     ```
+
+On Windows the bridge runs without a window: its output goes to `logs\bridge.log` and `logs\bridge.err.log`.
 
 ## License
 
