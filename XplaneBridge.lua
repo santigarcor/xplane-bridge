@@ -24,14 +24,15 @@ end
 
 local function stop_bridge()
     if IS_WINDOWS then
-        -- Usamos el PID guardado por start_bridge.ps1 para no matar otros procesos de node
+        -- Usamos el PID guardado por start_bridge.ps1 (el cmd.exe que envuelve a node);
+        -- /T mata tambien al proceso hijo node.exe
         local pid_path = BRIDGE_DIR .. "\\bridge.pid"
         local pid_file = io.open(pid_path, "r")
         if not pid_file then return end
         local pid = tonumber(pid_file:read("*l"))
         pid_file:close()
         if pid then
-            os.execute('taskkill /F /T /PID ' .. pid .. ' /FI "IMAGENAME eq node.exe" > nul 2>&1')
+            os.execute('taskkill /F /T /PID ' .. pid .. ' /FI "IMAGENAME eq cmd.exe" > nul 2>&1')
         end
         os.remove(pid_path)
     else
