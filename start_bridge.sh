@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# 1. Asegurar que el PATH incluya las rutas comunes de Node en macOS (Homebrew/Intel o Apple Silicon)
+# 1. Make sure PATH includes the usual Node locations on macOS (Homebrew on Intel or Apple Silicon)
 export PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:$PATH
 
-# Nota: Si instalaste Node vía NVM, descomenta las siguientes líneas en su lugar:
+# Note: if you installed Node via NVM, uncomment the following lines instead:
 export NVM_DIR="/Users/santiago/Library/Application Support/Herd/config/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 
@@ -26,7 +26,7 @@ load-nvmrc() {
   fi
 }
 
-# 2. Navegar al repositorio y ejecutar el bridge
+# 2. Go to the repo and run the bridge
 cd /Users/santiago/Repos/xplane-bridge
 load-nvmrc
 node dist/bridge.js
