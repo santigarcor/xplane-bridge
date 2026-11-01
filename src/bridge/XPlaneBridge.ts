@@ -57,7 +57,7 @@ export class XPlaneBridge {
     this.restUrl = `http://${process.env.XPLANE_HOST}:${process.env.XPLANE_PORT}/api/v2`
 
     this.arduino = new ArduinoSerialCommunicator(
-      parseInt(process.env.ARDUINO_BAUD || '9600'),
+      parseInt(process.env.ARDUINO_BAUD || '57600'),
     )
   }
 
