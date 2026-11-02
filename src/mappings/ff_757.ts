@@ -13,11 +13,11 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   /**
    * DISPLAYS
    */
-  bridge.addDataRef('sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot', {
-    arduino_cmd: 'set_course_1',
-    threshold: 1,
-    parser: ParserType.ROUND,
-  })
+  // bridge.addDataRef('sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot', {
+  //   arduino_cmd: 'set_course_1',
+  //   threshold: 1,
+  //   parser: ParserType.ROUND,
+  // })
   bridge.addDataRef('1-sim/AP/spdSetting', {
     arduino_cmd: 'set_speed',
     threshold: 1,
@@ -38,20 +38,20 @@ export function initializeMappings(bridge: XPlaneBridge): void {
     threshold: 50,
     parser: ParserType.ROUND,
   })
-  bridge.addDataRef('1-sim/radios/nav3_obs_deg_mag_pilot', {
-    arduino_cmd: 'set_course_2',
-    threshold: 1,
-    parser: ParserType.ROUND,
-  })
+  // bridge.addDataRef('1-sim/radios/nav3_obs_deg_mag_pilot', {
+  //   arduino_cmd: 'set_course_2',
+  //   threshold: 1,
+  //   parser: ParserType.ROUND,
+  // })
   bridge.addDataRef('sim/cockpit2/autopilot/vvi_status', {
     arduino_cmd: 'toggle_display_set_vertical_speed',
     threshold: 1,
     parser: ParserType.BOOLEAN,
   })
-  bridge.addDataRef('sim/cockpit2/autopilot/vnav_status', {
+  bridge.addDataRef('757Avionics/mcp/speed/label', {
     arduino_cmd: 'toggle_display_set_speed',
     threshold: 1,
-    parser: (v) => (v === 0 ? 1 : 0),
+    parser: ParserType.BOOLEAN,
   })
 
   /**
