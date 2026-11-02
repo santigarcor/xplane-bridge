@@ -228,10 +228,33 @@ export function initializeMappings(bridge: XPlaneBridge): void {
    * LEDS
    */
   // bridge.addBooleanDataRef('1-sim/AP/atSwitcher', 'at_arm_led')
-  bridge.addBooleanDataRef(
-    '757Avionics/ap/leftFdState',
-    'flight_director_1_led',
-  )
+
+  // Only the master FD LED is lit: the first FD switched on becomes master,
+  // and if it's switched off the other one takes over if it's still on.
+  // Kept inside initializeMappings so it resets when the plane is re-detected.
+  const fdState = {
+    left: false,
+    right: false,
+    master: null as 'left' | 'right' | null,
+  }
+  const fdLedParser = (side: 'left' | 'right') => (v: any) => {
+    fdState[side] = v > 0
+    if (fdState.master && !fdState[fdState.master]) fdState.master = null
+    if (fdState.master === null) {
+      fdState.master = fdState.left ? 'left' : fdState.right ? 'right' : null
+    }
+    return fdState.master === side ? 1 : 0
+  }
+  bridge.addDataRef('757Avionics/ap/leftFdState', {
+    arduino_cmd: 'flight_director_1_led',
+    threshold: 0,
+    parser: fdLedParser('left'),
+  })
+  bridge.addDataRef('757Avionics/ap/rghtFdState', {
+    arduino_cmd: 'flight_director_2_led',
+    threshold: 0,
+    parser: fdLedParser('right'),
+  })
   bridge.addBooleanDataRef('1-sim/AP/lamp/1', 'n1_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/2', 'speed_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/3', 'l_nav_led')
@@ -246,10 +269,6 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   bridge.addBooleanDataRef('1-sim/AP/lamp/12', 'cmd_a_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/14', 'cmd_b_led')
   bridge.addBooleanDataRef('1-sim/AP/lamp/13', 'cws_a_led')
-  bridge.addBooleanDataRef(
-    '757Avionics/ap/rghtFdState',
-    'flight_director_2_led',
-  )
   // Leaving these here to see if I can make the 757 work with the real FMC
   // /**
   //  * FMC
