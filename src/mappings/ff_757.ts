@@ -43,7 +43,7 @@ export function initializeMappings(bridge: XPlaneBridge): void {
   //   threshold: 1,
   //   parser: ParserType.ROUND,
   // })
-  bridge.addDataRef('sim/cockpit2/autopilot/vvi_status', {
+  bridge.addDataRef('757Avionics/mcp/vs/label', {
     arduino_cmd: 'toggle_display_set_vertical_speed',
     threshold: 1,
     parser: ParserType.BOOLEAN,
