@@ -250,6 +250,26 @@ void sendEncoderEvent(const char *encoder_name, const char *direction) {
   Serial.println("\"}");
 }
 
+/*
+ * Heartbeat
+ */
+// Lets the bridge detect a dead link even when nobody touches the panel
+const unsigned long HEARTBEAT_INTERVAL = 2000;
+unsigned long lastHeartbeat = 0;
+
+// Sends {"hb":<uptime in seconds>}
+void sendHeartbeat() {
+  // lastHeartbeat == 0 means first loop: send right away
+  if (lastHeartbeat != 0 && millis() - lastHeartbeat < HEARTBEAT_INTERVAL) {
+    return;
+  }
+  lastHeartbeat = millis();
+
+  Serial.print("{\"hb\":");
+  Serial.print(millis() / 1000);
+  Serial.println("}");
+}
+
 // Non-blocking toggle switches polling function
 void pollSwitches() {
   // Only poll every 10ms for good responsiveness without overwhelming CPU
@@ -281,28 +301,30 @@ void pollSwitches() {
       switches[i].lastState = currentState;
       switches[i].lastChangeTime = millis();
 
-      Serial.print("MOMENTARY SWITCH PRESSED: ");
-      Serial.print(switches[i].name);
-      Serial.print(" (pin ");
-      Serial.print(switches[i].pin);
-      Serial.println(")");
+      // For debugging purposes, you can uncomment the following lines to see when a momentary switch is pressed.
+      // Serial.print("MOMENTARY SWITCH PRESSED: ");
+      // Serial.print(switches[i].name);
+      // Serial.print(" (pin ");
+      // Serial.print(switches[i].pin);
+      // Serial.println(")");
     } else if (switches[i].type == SWITCH_MOMENTARY && switches[i].lastState == LOW) {
       // MOMENTARY SWITCH: If was LOW and now is HIGH revert to HIGH.
       switches[i].lastState = currentState;
     } else if (switches[i].type == SWITCH_TOGGLE) {
       // TOGGLE SWITCH: Trigger on both ON and OFF positions
-      Serial.print("TOGGLE SWITCH CHANGED: ");
-      Serial.print(switches[i].name);
-      if (currentState) {
-        Serial.print(" (switched ON)");
-      } else {
-        Serial.print(" (switched OFF)");
-      }
+      // For debugging purposes, you can uncomment the following lines to see when a toggle switch changes.
+      // Serial.print("TOGGLE SWITCH CHANGED: ");
+      // Serial.print(switches[i].name);
+      // if (currentState) {
+      //   Serial.print(" (switched ON)");
+      // } else {
+      //   Serial.print(" (switched OFF)");
+      // }
 
-      Serial.print("Pin ");
-      Serial.print(switches[i].pin);
-      Serial.print(" state: ");
-      Serial.println(currentState ? "LOW" : "HIGH");
+      // Serial.print("Pin ");
+      // Serial.print(switches[i].pin);
+      // Serial.print(" state: ");
+      // Serial.println(currentState ? "LOW" : "HIGH");
 
       switches[i].lastState = currentState;
       switches[i].changed = true;  // Use this flag to process in main loop
@@ -367,7 +389,7 @@ void toggleDisplay(String command, long value) {
         for (int j = displayCommands[i].firstDigitPosition; j < (displayCommands[i].firstDigitPosition + displayCommands[i].maxLength); j++) {
           ledControl.setRow(displayCommands[i].displayToShow, j, B00000000);
         }
-      } else { 
+      } else {
         setDisplay(&displayCommands[i], displayCommands[i].lastValue);
       }
       break;
@@ -550,6 +572,7 @@ void setup() {
   initLeds();
 
   Serial.println("POLLING system initialized");
+  // The bridge waits for this line to know setup() finished. Don't change it.
   Serial.println("Ready for input...");
 }
 
@@ -559,6 +582,7 @@ void loop() {
   pollEncoders();        // Check all encoders every 2ms
   sendSwitchInputs();    // Send any button press events
   processSerialInput();  // Handle incoming commands from NodeJS
+  sendHeartbeat();       // Let the bridge know we're alive every 2s
 
   // Optional: Performance monitoring
   // print_performance_stats();

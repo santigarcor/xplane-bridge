@@ -38,7 +38,11 @@ This project provides an interface between X-Plane 12 and Arduino, enabling cust
      ln -s <repo>/XplaneBridge.lua "<X-Plane 12>/Resources/plugins/FlyWithLua/Scripts/XplaneBridge.lua"
      ```
 
-On Windows the bridge runs without a window: its output goes to `logs\bridge.log` and `logs\bridge.err.log`.
+On Windows the bridge runs without a window. Each session writes its output to `logs\bridge-<start time>.log` and `logs\bridge.err-<start time>.log`, and the last 10 sessions are kept. To follow the current session:
+
+```powershell
+Get-ChildItem logs\bridge-*.log | Sort-Object Name | Select-Object -Last 1 | Get-Content -Wait -Tail 50
+```
 
 ## License
 
