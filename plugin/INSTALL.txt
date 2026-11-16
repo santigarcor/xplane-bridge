@@ -1,0 +1,45 @@
+XPlane Bridge - Arduino cockpit panel for X-Plane 12
+====================================================
+
+Requires X-Plane 12.3.0 or newer, Windows 64-bit.
+
+INSTALL
+1. Close X-Plane.
+2. If you used the old Node bridge, remove XplaneBridge.lua from
+     X-Plane 12\Resources\plugins\FlyWithLua\Scripts\
+   Only one of them can use the Arduino's COM port.
+3. Copy this whole "xplane_bridge" folder into
+     X-Plane 12\Resources\plugins\
+   so that this file exists:
+     X-Plane 12\Resources\plugins\xplane_bridge\win_x64\xplane_bridge.xpl
+4. Plug in the Arduino and start X-Plane.
+
+UNINSTALL
+Close X-Plane and delete the xplane_bridge folder from Resources\plugins.
+
+MENU
+Plugins menu > XPlane Bridge:
+  Status                     Connected (COM3), Searching for Arduino...,
+                             or ERROR - <reason>
+  Aircraft                   loaded mapping and datarefs found
+  Restart serial connection  close and reopen the port (resets the board)
+  Reload aircraft mappings   re-detect the aircraft and resend everything
+  Debug logging              log every message to and from the Arduino
+
+Restart and reload are also commands you can bind to a key or button:
+  xplane_bridge/restart_serial
+  xplane_bridge/reload_mappings
+
+SUPPORTED AIRCRAFT
+Zibo 737, FlightFactor 757, FlightFactor 777, Laminar C172 and C172 G1000.
+
+SETTINGS
+X-Plane 12\Output\preferences\xplane_bridge.ini (created when needed):
+  baud=57600       must match BAUD_RATE in the Arduino sketch
+  port=COM3        optional, skips autodetection
+  debug_logging=0
+
+LOGS
+X-Plane 12\Log.txt, on lines that start with "[xplane_bridge]", and
+the "logs" folder inside this folder (created by the plugin, last 10
+sessions kept, safe to delete).

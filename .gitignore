@@ -88,3 +88,8 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# Native plugin: X-Plane SDK (downloaded separately) and build output
+plugin/SDK/
+plugin/build/
+plugin/dist/
