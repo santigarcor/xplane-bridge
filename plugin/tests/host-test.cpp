@@ -292,8 +292,14 @@ static void testWithArduino() {
     CHECK(link.getStatus().state == LinkState::Connected);
     CHECK(link.getStatus().error.empty());
 
-    // On connect the whole state is sent once (one line per mapped Arduino command)
-    runFrames(link, bridge, milliseconds(500), &slowestFrameMs);
+    // On connect the whole state is sent once (one line per mapped Arduino command), paced at
+    // one line per 25 ms
+    auto burstStart = Clock::now();
+    runFramesUntil(link, bridge, milliseconds(2000), [&] { return countSent(mark) >= 22; }, &slowestFrameMs);
+    double burstMs = std::chrono::duration<double, std::milli>(Clock::now() - burstStart).count();
+    printf("  initial state written in %.0f ms\n", burstMs);
+    CHECK(burstMs >= 21 * 25);
+    runFrames(link, bridge, milliseconds(300), &slowestFrameMs);
     int initial = countSent(mark);
     printf("  initial state: %d lines\n", initial);
     CHECK(initial == 22);
@@ -344,18 +350,23 @@ static void testWithArduino() {
     CHECK(dropped);
     bool reconnected = runFramesUntil(link, bridge, milliseconds(12000), [&] { return link.isConnected(); }, &slowestFrameMs);
     CHECK(reconnected);
-    runFrames(link, bridge, milliseconds(500), &slowestFrameMs);
+    runFrames(link, bridge, milliseconds(1200), &slowestFrameMs);
     printf("  restart: reconnected in %lld ms, resent %d lines\n",
         static_cast<long long>(std::chrono::duration_cast<milliseconds>(Clock::now() - restartStart).count()), countSent(mark));
     CHECK(countSent(mark) == 22);
 
-    // Stop is quick when the driver behaves
+    // Stop is quick when the driver behaves, and switches the panel off on the way out (as the
+    // plugin does when X-Plane quits). Watch the board: displays and LEDs should go dark.
+    link.setShutdownLine(protocol::buildOutgoing("power", 0.0));
+    mark = stub::debugLines().size();
     auto stopStart = Clock::now();
     link.stop();
     double stopMs = std::chrono::duration<double, std::milli>(Clock::now() - stopStart).count();
     printf("  stop took %.1f ms\n", stopMs);
     CHECK(stopMs < 500);
     CHECK(link.getStatus().state == LinkState::Stopped);
+    stub::runFlightLoops(); // flushes the worker's queued log lines
+    CHECK(countSent(mark, "{\"cmd\":\"power\",\"value\":0}") == 1);
 
     printf("  slowest main-thread frame: %.3f ms\n", slowestFrameMs);
     CHECK(slowestFrameMs < 2.0);

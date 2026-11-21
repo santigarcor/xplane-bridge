@@ -66,9 +66,14 @@ class SerialLink {
 
         void requestRestart();
 
+        // A line written right before the port closes when stop() is called (not on restarts or
+        // reconnects), if the board is connected. Used to switch the panel off when X-Plane quits.
+        void setShutdownLine(const std::string &line);
+
         // Queues a line (without the newline) for the Arduino. Dropped unless connected, so nothing
-        // piles up while the board is booting or unplugged.
-        void send(const std::string &line);
+        // piles up while the board is booting or unplugged. A line still queued with the same key
+        // is replaced, since only the latest value of a display or LED matters.
+        void send(const std::string &key, const std::string &line);
 
         std::vector<SerialEvent> drainEvents();
         LinkStatus getStatus() const;

@@ -344,7 +344,7 @@ bool Bridge::shouldSendUpdate(const std::string &cmd, const Value &value, double
 
 void Bridge::sendToArduino(const std::string &cmd, const Value &value) {
     if (link.isConnected()) {
-        link.send(protocol::buildOutgoing(cmd, value));
+        link.send(cmd, protocol::buildOutgoing(cmd, value));
     }
 }
 

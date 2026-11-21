@@ -37,6 +37,13 @@ static constexpr milliseconds kStopTimeout{3000};
 /** Lines longer than this are garbage (e.g. after a reset) and are dropped */
 static constexpr size_t kMaxLineLength = 1024;
 static constexpr size_t kMaxQueuedLines = 500;
+/**
+ * Minimum gap between two lines to the Arduino. The sketch reads one line per loop() and a display
+ * update takes several ms of bit-banged SPI, while its receive buffer is only 64 bytes (under two
+ * lines at 57600 baud). Lines written back to back overflow it and are silently lost, which left the
+ * panel showing stale values after the burst when an aircraft finishes loading.
+ */
+static constexpr milliseconds kWriteInterval{25};
 static constexpr size_t kMaxQueuedEvents = 1000;
 
 static long long nowMs() {
@@ -56,23 +63,35 @@ class SerialWorker {
             SetEvent(wakeEvent.get());
         }
 
+        void setShutdownLine(const std::string &line) {
+            std::lock_guard<std::mutex> lock(queueMutex);
+            shutdownLine = line;
+        }
+
         void requestRestart() {
             restartRequested.store(true);
             SetEvent(wakeEvent.get());
         }
 
-        void send(const std::string &line) {
+        void send(const std::string &key, const std::string &line) {
             if (!connected.load()) {
                 return;
             }
 
             std::lock_guard<std::mutex> lock(queueMutex);
+            for (auto &queued : outgoing) {
+                if (queued.key == key) {
+                    // Not written yet, so the old value never needs to reach the board
+                    queued.line = line;
+                    return;
+                }
+            }
             if (outgoing.size() >= kMaxQueuedLines) {
                 // The writer can't keep up, so the oldest updates are stale anyway
                 outgoing.pop_front();
                 droppedLines++;
             }
-            outgoing.push_back(line);
+            outgoing.push_back({key, line});
         }
 
         std::vector<SerialEvent> drainEvents() {
@@ -109,6 +128,7 @@ class SerialWorker {
         void closePort();
         void failPort(const std::string &logMessage, const std::string &statusError);
         bool writePending();
+        void writeShutdownLine();
         bool readAvailable();
         void handleLine(const std::string &line);
         void handleHeartbeat(double uptime);
@@ -131,10 +151,17 @@ class SerialWorker {
         std::atomic<long long> closingSince{0};
         std::atomic<bool> reportedCloseHang{false};
 
+        struct OutgoingLine {
+                std::string key;
+                std::string line;
+        };
+
         std::mutex queueMutex;
-        std::deque<std::string> outgoing;
+        std::deque<OutgoingLine> outgoing;
         std::vector<SerialEvent> events;
         size_t droppedLines = 0;
+        /** Written once when the worker stops, if still connected (empty: nothing) */
+        std::string shutdownLine;
 
         std::mutex statusMutex;
         LinkStatus status;
@@ -146,6 +173,7 @@ class SerialWorker {
         bool discardingLine = false;
         Clock::time_point lastRx;
         Clock::time_point nextAttempt;
+        Clock::time_point nextWrite;
         /** Uptime reported by the last heartbeat, empty until the first one after a (re)boot */
         std::optional<double> lastHeartbeat;
         /** Avoids logging the same problem every 5 s while it lasts */
@@ -193,8 +221,35 @@ void SerialWorker::run() {
         checkLiveness();
     }
 
+    writeShutdownLine();
     closePort();
     setStatus(LinkState::Stopped, "");
+}
+
+void SerialWorker::writeShutdownLine() {
+    std::string line;
+    {
+        std::lock_guard<std::mutex> lock(queueMutex);
+        line = shutdownLine;
+    }
+    if (line.empty() || !port.valid() || !connected.load()) {
+        return;
+    }
+
+    // Keep the gap after the last line, or the sketch may lose this one too. At most 25 ms, and
+    // this is the worker thread, so X-Plane isn't waiting on it beyond stop()'s 3 s cap.
+    auto now = Clock::now();
+    if (now < nextWrite) {
+        Sleep(static_cast<DWORD>(std::chrono::duration_cast<milliseconds>(nextWrite - now).count() + 1));
+    }
+
+    std::string data = line + "\n";
+    DWORD written = 0;
+    if (WriteFile(port.get(), data.data(), static_cast<DWORD>(data.size()), &written, nullptr) && written == data.size()) {
+        // Make sure it left the PC before the port closes. stop() cancels this if the driver hangs.
+        FlushFileBuffers(port.get());
+        Logger::getInstance().debug("[=> Arduino] %s", line.c_str());
+    }
 }
 
 bool SerialWorker::openPort() {
@@ -334,31 +389,42 @@ void SerialWorker::failPort(const std::string &logMessage, const std::string &st
 }
 
 bool SerialWorker::writePending() {
-    std::deque<std::string> lines;
+    // One line per kWriteInterval, so the sketch never has more than one line waiting
+    auto now = Clock::now();
+    if (now < nextWrite) {
+        return true;
+    }
+
+    std::string line;
     size_t dropped = 0;
     {
         std::lock_guard<std::mutex> lock(queueMutex);
-        lines.swap(outgoing);
         std::swap(dropped, droppedLines);
+        if (!outgoing.empty()) {
+            line = std::move(outgoing.front().line);
+            outgoing.pop_front();
+        }
     }
 
     if (dropped > 0) {
         Logger::getInstance().warn("Write queue full, %zu old updates were dropped", dropped);
     }
-
-    for (const auto &line : lines) {
-        std::string data = line + "\n";
-        DWORD written = 0;
-        if (!WriteFile(port.get(), data.data(), static_cast<DWORD>(data.size()), &written, nullptr)) {
-            failPort("Error writing to " + portName + ": " + win32ErrorMessage(GetLastError()), "writing to " + portName + " failed, reconnecting");
-            return false;
-        }
-        if (written < data.size()) {
-            failPort("Writing to " + portName + " timed out, the Arduino is not reading. Reconnecting...", portName + " not accepting data, reconnecting");
-            return false;
-        }
-        Logger::getInstance().debug("[=> Arduino] %s", line.c_str());
+    if (line.empty()) {
+        return true;
     }
+
+    std::string data = line + "\n";
+    DWORD written = 0;
+    if (!WriteFile(port.get(), data.data(), static_cast<DWORD>(data.size()), &written, nullptr)) {
+        failPort("Error writing to " + portName + ": " + win32ErrorMessage(GetLastError()), "writing to " + portName + " failed, reconnecting");
+        return false;
+    }
+    if (written < data.size()) {
+        failPort("Writing to " + portName + " timed out, the Arduino is not reading. Reconnecting...", portName + " not accepting data, reconnecting");
+        return false;
+    }
+    nextWrite = now + kWriteInterval;
+    Logger::getInstance().debug("[=> Arduino] %s", line.c_str());
 
     return true;
 }
@@ -607,8 +673,12 @@ void SerialLink::requestRestart() {
     worker->requestRestart();
 }
 
-void SerialLink::send(const std::string &line) {
-    worker->send(line);
+void SerialLink::setShutdownLine(const std::string &line) {
+    worker->setShutdownLine(line);
+}
+
+void SerialLink::send(const std::string &key, const std::string &line) {
+    worker->send(key, line);
 }
 
 std::vector<SerialEvent> SerialLink::drainEvents() {

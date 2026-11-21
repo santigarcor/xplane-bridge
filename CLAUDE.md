@@ -40,6 +40,10 @@ Host → Arduino: `{"cmd":"<name>","value":<number>}`
 
 Numbers are sent like JavaScript's `JSON.stringify` (integers without a decimal point). Opening the port resets the board through DTR, and it takes ~2 s to boot.
 
+The sketch reads one line per `loop()` and has a 64-byte receive buffer (under two lines). A display update is several ms of bit-banged SPI, so lines written back to back get lost silently: corrupt JSON is ignored, and there are no acks. The plugin therefore writes at most one line every 25 ms, and replaces a queued line for the same `cmd` instead of queueing another. (A periodic resend of the stored values was tried and removed at the user's request.)
+
+When X-Plane quits or the plugin is disabled, the plugin sends `power 0` right before closing the port, so the panel goes dark until the next session connects. Nothing is sent on restarts, reconnects or unsupported aircraft (the user's choice). The sketch also boots dark (displays cleared, LEDs off), so a reset caused by closing the port leaves the panel dark too.
+
 ## Mappings
 
 Each aircraft has an initializer that calls the bridge's mapping API (same names in TS and C++):
@@ -105,6 +109,7 @@ Discover the port (manufacturer or instance ID contains `arduino|usb|serial`, or
 - Parsers run every frame, so stateful parsers see the latest values. This fixes a Node case where the 757 FO FD LED didn't light when the captain FD (master) was switched off.
 - Datarefs that don't exist yet are retried every 5 s and on `XPLM_MSG_DATAREFS_ADDED`; the rest work right away. Node waited until all of them existed. Missing ones are reported after a 10 s grace period.
 - An unsupported aircraft clears the mappings. Node kept the previous aircraft's mappings active.
+- Writes to the board are paced and coalesced (see the serial protocol). Node wrote everything back to back, which lost lines in the burst when an aircraft finished loading. The panel then showed stale values until a restart or reload resent everything.
 - Byte datarefs are read as raw text. The web API sent them base64 encoded, so `BASE64DECODE` has no C++ equivalent.
 
 ### Build, test, install

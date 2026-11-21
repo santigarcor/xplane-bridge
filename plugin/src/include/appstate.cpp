@@ -5,6 +5,7 @@
 #include "logger.h"
 #include "plugins-menu.h"
 #include "preferences.h"
+#include "protocol.h"
 #include "serial-link.h"
 #include "win-utils.h"
 
@@ -98,6 +99,12 @@ void AppState::shutdown() {
     commands.clear();
 
     menu.reset();
+    // X-Plane is quitting (or the plugin is disabled): blank the displays and LEDs until the next
+    // session connects and sends the state again
+    if (link != nullptr && link->isConnected()) {
+        Logger::getInstance().info("Switching the panel off");
+        link->setShutdownLine(protocol::buildOutgoing("power", 0.0));
+    }
     // Releases any held commands, then the link waits (at most 3 s) for the serial thread
     bridge.reset();
     link.reset();
